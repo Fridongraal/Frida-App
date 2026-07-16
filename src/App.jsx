@@ -37,8 +37,8 @@ export default function App() {
   // Pantalla de carga estética
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-light-bg dark:bg-dark-bg flex flex-col items-center justify-center gap-4 transition-colors duration-300">
-        <div className="w-16 h-16 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/30 dark:border-dark-card flex items-center justify-center text-frida-primary shadow-sm relative">
+      <div className="h-screen w-screen bg-light-bg dark:bg-dark-bg flex flex-col items-center justify-center gap-4 transition-all duration-300 ease-in-out">
+        <div className="w-16 h-16 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/30 dark:border-dark-muted flex items-center justify-center text-frida-primary shadow-sm relative transition-all duration-300 ease-in-out">
           <Sparkles size={28} className="animate-pulse text-frida-primary" />
         </div>
         <div className="flex flex-col items-center gap-1">
@@ -92,7 +92,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-light-bg dark:bg-dark-bg select-none overflow-hidden text-light-text dark:text-dark-text font-sans flex flex-col transition-colors duration-300">
+    <div className="h-screen w-screen bg-light-bg dark:bg-dark-bg select-none overflow-hidden text-light-text dark:text-dark-text font-sans flex flex-col transition-all duration-300 ease-in-out">
       {/* Contenedor Principal */}
       <main className="flex-1 overflow-hidden relative">
         {currentScreen === 'home' && (

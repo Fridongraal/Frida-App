@@ -13,7 +13,7 @@ export default function Flashcard({ card, isFlipped, onFlip }) {
         }`}
       >
         {/* CARA ANTERIOR (Pregunta) */}
-        <div className="absolute inset-0 w-full h-full backface-hidden bg-light-card dark:bg-dark-card rounded-3xl p-8 border border-lavender-100 dark:border-lavender-950/40 shadow-sm hover:shadow-md transition-all flex flex-col justify-between items-center text-center">
+        <div className="absolute inset-0 w-full h-full backface-hidden bg-light-card dark:bg-dark-card rounded-3xl p-8 border border-frida-primary/15 dark:border-dark-muted shadow-sm hover:shadow-md transition-all duration-300 ease-in-out flex flex-col justify-between items-center text-center">
           <div className="flex items-center gap-1.5 text-xs font-bold text-frida-primary tracking-wider uppercase">
             <HelpCircle size={14} />
             <span>Pregunta</span>
@@ -32,7 +32,7 @@ export default function Flashcard({ card, isFlipped, onFlip }) {
         </div>
 
         {/* CARA POSTERIOR (Respuesta) */}
-        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-light-card dark:bg-dark-card rounded-3xl p-8 border border-lavender-200 dark:border-lavender-950/40 shadow-sm flex flex-col justify-between items-center text-center">
+        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-light-card dark:bg-dark-card rounded-3xl p-8 border border-frida-primary/20 dark:border-dark-muted shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 ease-in-out">
           <div className="flex items-center gap-1.5 text-xs font-bold text-frida-primary tracking-wider uppercase">
             <CheckCircle size={14} />
             <span>Respuesta</span>

@@ -60,22 +60,22 @@ function getToneClasses(tone, active) {
   if (tone === 'again') {
     const stateClasses = active
       ? 'scale-95 bg-red-100/95 dark:bg-red-950/45 border-red-300 dark:border-red-800'
-      : 'bg-white hover:bg-red-50/50 dark:bg-dark-card border-red-200 dark:border-red-950/60 hover:-translate-y-0.5 hover:shadow-md';
+      : 'bg-white hover:bg-red-50/50 dark:bg-transparent border-red-200 dark:border-red-950/70 hover:-translate-y-0.5 hover:shadow-md';
     return `${base} ${stateClasses} text-red-500 dark:text-red-400 focus-visible:ring-red-400/50`;
   }
 
   if (tone === 'easy') {
     const stateClasses = active
-      ? 'scale-95 bg-frida-accent/90 dark:bg-frida-accent/35 border-frida-accent'
-      : 'bg-frida-accent hover:bg-frida-accent/90 dark:bg-transparent border-frida-accent/40 dark:border-frida-accent hover:-translate-y-0.5 hover:shadow-md';
-    return `${base} ${stateClasses} text-light-text dark:text-frida-accent focus-visible:ring-frida-accent/50`;
+      ? 'scale-95 bg-frida-accent/90 dark:bg-frida-accent border-frida-accent'
+      : 'bg-frida-accent hover:bg-frida-accent/90 dark:bg-transparent dark:hover:bg-frida-accent dark:hover:text-light-text border-frida-accent/40 dark:border-frida-accent hover:-translate-y-0.5 hover:shadow-md';
+    return `${base} ${stateClasses} text-light-text dark:text-frida-accent dark:active:text-light-text focus-visible:ring-frida-accent/50`;
   }
 
   // default tone: good (Bien)
   const stateClasses = active
-    ? 'scale-95 bg-frida-secondary/90 dark:bg-frida-primary/35 border-frida-primary'
-    : 'bg-frida-secondary hover:bg-frida-secondary/90 dark:bg-transparent border-frida-primary/40 dark:border-frida-primary hover:-translate-y-0.5 hover:shadow-md';
-  return `${base} ${stateClasses} text-light-text dark:text-frida-primary focus-visible:ring-frida-primary/50`;
+    ? 'scale-95 bg-frida-secondary/90 dark:bg-frida-primary border-frida-primary'
+    : 'bg-frida-secondary hover:bg-frida-secondary/90 dark:bg-transparent dark:hover:bg-frida-primary dark:hover:text-light-text border-frida-primary/40 dark:border-frida-primary hover:-translate-y-0.5 hover:shadow-md';
+  return `${base} ${stateClasses} text-light-text dark:text-frida-primary dark:active:text-light-text focus-visible:ring-frida-primary/50`;
 }
 
 function FeedbackButton({ tone, label, shortcut, icon: Icon, active, onClick }) {
@@ -293,21 +293,21 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         </p>
 
         <div className="grid grid-cols-3 gap-4 w-full mb-10">
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-frida-primary/20 rounded-2xl">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-light-text dark:text-frida-secondary">{counts.newCount}</span>
             <span className="text-[10px] font-bold text-light-text/75 dark:text-frida-secondary/80 uppercase tracking-wider mt-1">
               Nuevas
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-accent/80 dark:bg-frida-accent/20 border border-frida-accent/30 dark:border-frida-accent/20 rounded-2xl">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-accent/80 dark:bg-frida-accent/20 border border-frida-accent/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-sky-900 dark:text-frida-accent">{counts.learningCount}</span>
             <span className="text-[10px] font-bold text-sky-950/75 dark:text-frida-accent/80 uppercase tracking-wider mt-1">
               Aprendizaje
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-success/80 dark:bg-frida-success/20 border border-frida-success/30 dark:border-frida-success/25 rounded-2xl">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-success/80 dark:bg-frida-success/20 border border-frida-success/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-green-900 dark:text-green-300">{counts.reviewCount}</span>
             <span className="text-[10px] font-bold text-green-950/75 dark:text-green-400 uppercase tracking-wider mt-1">
               Repasar
@@ -318,7 +318,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         <div className="flex items-center gap-3 w-full">
           <button
             onClick={onBack}
-            className="flex-1 py-3.5 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 text-warmgray-455 dark:text-warmgray-400 border border-frida-primary/20 dark:border-lavender-950/60 font-bold rounded-2xl transition-colors duration-200 text-sm"
+            className="flex-1 py-3.5 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-dark-muted/20 text-warmgray-455 dark:text-warmgray-400 border border-frida-primary/20 dark:border-dark-muted font-bold rounded-2xl transition-colors duration-200 text-sm"
           >
             Volver
           </button>
@@ -347,8 +347,8 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         </p>
 
         {totalEstudiadas > 0 && (
-          <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 mb-8 shadow-sm transition-colors duration-300">
-            <h3 className="text-sm font-semibold text-frida-primary dark:text-frida-secondary mb-4 uppercase tracking-wider">
+          <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 mb-8 shadow-sm transition-colors duration-300">
+            <h3 className="text-sm font-semibold text-frida-primary dark:text-dark-muted mb-4 uppercase tracking-wider">
               Resumen de respuestas
             </h3>
             <div className="grid grid-cols-3 gap-2">
@@ -400,7 +400,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
               {getCardCategoryInfo(currentCardView).label}
             </span>
           )}
-          <span className="text-xs font-bold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary px-3 py-1 rounded-full border border-frida-primary/20 dark:border-lavender-950/40">
+          <span className="text-xs font-bold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-dark-muted px-3 py-1 rounded-full border border-frida-primary/20 dark:border-dark-muted">
             Mazo: {deck.name}
           </span>
         </div>
@@ -413,7 +413,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
             {Math.min(currentIndex + 1, dueCards.length)} de {dueCards.length} tarjetas
           </span>
         </div>
-        <div className="w-full h-2 bg-frida-secondary/15 dark:bg-frida-primary/5 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-frida-secondary/15 dark:bg-dark-muted/20 rounded-full overflow-hidden">
           <div
             className="h-full bg-frida-primary transition-all duration-300 rounded-full"
             style={{ width: `${progressPercent || 5}%` }}

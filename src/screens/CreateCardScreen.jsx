@@ -95,7 +95,7 @@ export default function CreateCardScreen({
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2 flex-wrap">
           <span>Añadir Tarjetas</span>
-          <span className="text-sm font-semibold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary px-3 py-1 rounded-full border border-frida-primary/20 dark:border-lavender-950/40">
+          <span className="text-sm font-semibold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary px-3 py-1 rounded-full border border-frida-primary/20 dark:border-dark-muted">
             {selectedDeck.name}
           </span>
         </h2>
@@ -109,14 +109,14 @@ export default function CreateCardScreen({
           className="flex flex-col gap-4 md:col-span-3 overflow-y-auto pr-1"
           onSubmit={(e) => handleSave(e, false)}
         >
-          <div className="bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-lavender-950/40 rounded-3xl p-4 shadow-sm transition-colors duration-300">
+          <div className="bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-dark-muted rounded-3xl p-4 shadow-sm transition-colors duration-300">
             <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-2">
               Mazo destino
             </label>
             <select
               value={activeDeckId}
               onChange={(e) => setActiveDeckId(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/60 focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
+              className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-dark-muted focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
             >
               {groupedDecks.map(({ subject, decks: subjectDecks }) => (
                 <optgroup key={subject.id} label={subject.name} className="dark:bg-dark-card">
@@ -131,7 +131,7 @@ export default function CreateCardScreen({
 
             {selectedSubject && (
               <div className="mt-3 flex items-center gap-2 text-xs text-warmgray-450 dark:text-warmgray-400">
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary border border-frida-primary/20 dark:border-lavender-950/40">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-frida-secondary/20 dark:bg-frida-primary/20 text-frida-primary dark:text-frida-secondary border border-frida-primary/20 dark:border-dark-muted">
                   Materia: {selectedSubject.name}
                 </span>
                 <span>{selectedDeck.cards?.filter(isCardDue).length || 0} pendientes en este mazo</span>
@@ -151,7 +151,7 @@ export default function CreateCardScreen({
                 value={front}
                 onChange={(e) => setFront(e.target.value)}
                 rows="3"
-                className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/20 border border-frida-primary/25 dark:border-lavender-950/50 focus:border-frida-primary dark:focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all resize-none shadow-sm"
+                className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/20 border border-frida-primary/25 dark:border-dark-muted focus:border-frida-primary dark:focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all resize-none shadow-sm"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function CreateCardScreen({
                 value={back}
                 onChange={(e) => setBack(e.target.value)}
                 rows="4"
-                className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/20 border border-frida-primary/25 dark:border-lavender-950/50 focus:border-frida-primary dark:focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all resize-none shadow-sm"
+                className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/20 border border-frida-primary/25 dark:border-dark-muted focus:border-frida-primary dark:focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all resize-none shadow-sm"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function CreateCardScreen({
           <div className="flex items-center gap-3">
             <button
               type="submit"
-              className="flex-1 py-3 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary border border-frida-primary/25 dark:border-lavender-950/55 font-bold rounded-2xl text-sm transition-colors duration-200"
+              className="flex-1 py-3 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary border border-frida-primary/25 dark:border-dark-muted font-bold rounded-2xl text-sm transition-colors duration-200"
             >
               Añadir otra
             </button>
@@ -195,8 +195,8 @@ export default function CreateCardScreen({
           </div>
         </form>
 
-        <div className="md:col-span-2 bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-lavender-950/40 p-4 flex flex-col overflow-hidden shadow-sm h-full max-h-[400px] md:max-h-none transition-colors duration-300">
-          <div className="flex items-center justify-between mb-3 border-b border-frida-primary/10 dark:border-lavender-950/40 pb-2">
+        <div className="md:col-span-2 bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-dark-muted p-4 flex flex-col overflow-hidden shadow-sm h-full max-h-[400px] md:max-h-none transition-colors duration-300">
+          <div className="flex items-center justify-between mb-3 border-b border-frida-primary/10 dark:border-dark-muted pb-2">
             <span className="text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider">
               Tarjetas en Mazo
             </span>
@@ -210,7 +210,7 @@ export default function CreateCardScreen({
               selectedDeck.cards.slice().reverse().map((card) => (
                 <div
                   key={card.id}
-                  className="flex items-center justify-between p-2.5 bg-light-bg dark:bg-dark-bg/30 rounded-xl hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 transition-colors border border-transparent hover:border-frida-primary/20 dark:hover:border-lavender-900 group"
+                  className="flex items-center justify-between p-2.5 bg-light-bg dark:bg-dark-bg/30 rounded-xl hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 transition-colors border border-transparent hover:border-frida-primary/20 dark:hover:border-dark-muted group"
                 >
                   <div className="flex-1 min-w-0 pr-2">
                     <p className="text-xs font-bold text-light-text dark:text-dark-text truncate">{card.front}</p>
@@ -233,7 +233,7 @@ export default function CreateCardScreen({
               ))
             ) : (
               <div className="flex flex-col items-center justify-center h-full py-8 text-center">
-                <BookOpen size={24} className="text-frida-primary/30 dark:text-lavender-950 mb-2" />
+                <BookOpen size={24} className="text-frida-primary/30 dark:text-dark-muted/40 mb-2" />
                 <span className="text-xs text-warmgray-450 dark:text-warmgray-500">El mazo está vacío</span>
               </div>
             )}

@@ -9,8 +9,8 @@ export function isCardDue(card) {
 export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOpenCSVImporter }) {
   if (decks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 shadow-sm animate-fade-in transition-colors duration-300">
-        <div className="w-16 h-16 bg-frida-secondary/15 dark:bg-frida-primary/10 rounded-2xl flex items-center justify-center text-frida-primary mb-4">
+      <div className="flex flex-col items-center justify-center p-12 text-center bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm animate-fade-in transition-colors duration-300">
+        <div className="w-16 h-16 bg-frida-secondary/15 dark:bg-frida-primary/20 rounded-2xl flex items-center justify-center text-frida-primary mb-4">
           <Layers size={32} />
         </div>
         <h3 className="text-xl font-semibold text-light-text dark:text-dark-text mb-2">No tienes mazos aún</h3>
@@ -29,12 +29,12 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
         return (
           <div
             key={deck.id}
-            className="group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-lavender-800 transition-all duration-300"
+            className="group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-frida-primary/60 transition-all duration-300"
           >
             <div>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-frida-secondary/15 dark:bg-frida-primary/10 rounded-xl flex items-center justify-center text-frida-primary group-hover:bg-frida-secondary/30 dark:group-hover:bg-frida-primary/20 transition-colors">
+                  <div className="w-10 h-10 bg-frida-secondary/15 dark:bg-frida-primary/20 rounded-xl flex items-center justify-center text-frida-primary group-hover:bg-frida-secondary/30 dark:group-hover:bg-frida-primary/30 transition-colors">
                     <Layers size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-light-text dark:text-dark-text truncate max-w-[200px]" title={deck.name}>
@@ -101,7 +101,7 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${
                     dueCards > 0
                       ? 'bg-frida-primary text-light-text hover:bg-frida-primary/90 hover:shadow-sm shadow-frida-secondary/20'
-                      : 'bg-warmgray-100 dark:bg-lavender-950/20 text-warmgray-450 dark:text-warmgray-500 cursor-not-allowed'
+                      : 'bg-warmgray-100 dark:bg-dark-muted/20 text-warmgray-450 dark:text-warmgray-500 cursor-not-allowed'
                   }`}
                 >
                   <BookOpen size={16} />

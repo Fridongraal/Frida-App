@@ -45,7 +45,7 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
 
           <button
             onClick={onOpenCSVImporter}
-            className="flex items-center gap-2 px-4 py-3 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-secondary/20 text-frida-primary dark:text-frida-secondary border border-frida-primary/30 dark:border-lavender-950/60 font-bold rounded-2xl transition-all duration-200 shadow-sm"
+            className="flex items-center gap-2 px-4 py-3 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-secondary/20 text-frida-primary dark:text-frida-secondary border border-frida-primary/30 dark:border-dark-muted font-bold rounded-2xl transition-all duration-200 shadow-sm"
             title="Importar tarjetas desde CSV"
           >
             <Upload size={18} />
@@ -63,19 +63,19 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-450 uppercase tracking-wider">
             Materias
           </span>
           <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{totalSubjects}</span>
         </div>
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-450 uppercase tracking-wider">
             Mazos
           </span>
           <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{totalDecks}</span>
         </div>
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-450 uppercase tracking-wider">
             Pendientes Hoy
           </span>
@@ -92,17 +92,17 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
         </div>
 
         {subjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 shadow-sm animate-fade-in transition-colors duration-300">
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm animate-fade-in transition-colors duration-300">
             <div className="w-16 h-16 bg-frida-secondary/15 dark:bg-frida-primary/10 rounded-2xl flex items-center justify-center text-frida-primary mb-4">
               <AlertCircle size={32} />
             </div>
-            <h3 className="text-xl font-semibold text-lavender-950 dark:text-white mb-2">No tienes materias aún</h3>
+            <h3 className="text-xl font-semibold text-light-text dark:text-dark-text mb-2">No tienes materias aún</h3>
             <p className="text-warmgray-450 dark:text-warmgray-450 max-w-sm mb-6 text-sm">
               Crea tu primera materia para empezar a organizar mazos por tema.
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-5 py-3 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-2xl transition-colors duration-200"
+              className="px-5 py-3 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-2xl transition-all duration-300 shadow-sm shadow-frida-secondary/25"
             >
               Crear Materia
             </button>
@@ -116,16 +116,16 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                 <button
                   key={subject.id}
                   onClick={() => onOpenSubject(subject.id)}
-                  className="text-left group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-lavender-800 transition-all duration-300"
+                  className="text-left group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-frida-primary/60 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-frida-secondary/15 dark:bg-frida-primary/10 rounded-2xl flex items-center justify-center text-frida-primary group-hover:bg-frida-secondary/30 dark:group-hover:bg-frida-primary/20 transition-colors">
+                      <div className="w-12 h-12 bg-frida-secondary/15 dark:bg-frida-primary/20 rounded-2xl flex items-center justify-center text-frida-primary group-hover:bg-frida-secondary/30 dark:group-hover:bg-frida-primary/30 transition-colors">
                         <Layers size={22} />
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-light-text dark:text-dark-text">{subject.name}</h3>
-                        <p className="text-sm text-warmgray-450 dark:text-warmgray-450 mt-1">
+                        <p className="text-sm text-warmgray-455 dark:text-warmgray-450 mt-1">
                           {stats.deckCount} mazo{stats.deckCount === 1 ? '' : 's'} dentro de esta materia
                         </p>
                       </div>
@@ -135,13 +135,13 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mt-6">
-                    <div className="rounded-2xl bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/15 dark:border-lavender-950/30 p-3 transition-colors duration-300">
+                    <div className="rounded-2xl bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/15 dark:border-dark-muted/55 p-3 transition-colors duration-300">
                       <span className="block text-xs font-semibold uppercase tracking-wider text-frida-primary">
                         Mazos
                       </span>
                       <span className="block text-xl font-bold text-light-text dark:text-dark-text mt-1">{stats.deckCount}</span>
                     </div>
-                    <div className="rounded-2xl bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-lavender-950/40 p-3 transition-colors duration-300">
+                    <div className="rounded-2xl bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-dark-muted p-3 transition-colors duration-300">
                       <span className="block text-xs font-semibold uppercase tracking-wider text-warmgray-455 dark:text-warmgray-450">
                         Pendientes
                       </span>
@@ -168,23 +168,23 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-lavender-950/20 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-all duration-300">
+        <div className="fixed inset-0 bg-light-bg/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-all duration-300">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-2 text-warmgray-400 dark:text-warmgray-500 hover:text-lavender-950 dark:hover:text-white hover:bg-lavender-50 dark:hover:bg-lavender-950/30 rounded-xl transition-all"
+              className="absolute top-4 right-4 p-2 text-warmgray-455 dark:text-warmgray-500 hover:text-light-text dark:hover:text-white hover:bg-frida-secondary/20 dark:hover:bg-frida-primary/10 rounded-xl transition-all"
             >
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-bold text-lavender-950 dark:text-white mb-1">Crear Nueva Materia</h3>
-            <p className="text-xs text-warmgray-450 mb-6">
+            <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-1">Crear Nueva Materia</h3>
+            <p className="text-xs text-warmgray-455 mb-6">
               Agrupa tus mazos por tema para mantener la organización simple.
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1">
                   Nombre de la materia
                 </label>
                 <input
@@ -193,7 +193,7 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                   placeholder="Ej. Programación, Inglés, Medicina..."
                   value={newSubjectName}
                   onChange={(e) => setNewSubjectName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 dark:bg-lavender-950/20 border border-lavender-100 dark:border-lavender-950 focus:border-lavender-400 focus:bg-white dark:focus:bg-darkCard text-sm text-lavender-950 dark:text-white focus:outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-dark-muted focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
                 />
               </div>
 
@@ -201,13 +201,13 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 text-sm font-semibold text-warmgray-400 dark:text-warmgray-500 hover:bg-warmgray-100 dark:hover:bg-lavender-950/20 rounded-2xl transition-colors duration-200"
+                  className="flex-1 py-3 text-sm font-semibold text-warmgray-455 dark:text-warmgray-500 hover:bg-warmgray-100 dark:hover:bg-frida-primary/10 rounded-2xl transition-colors duration-200"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-sm font-bold bg-lavender-500 hover:bg-lavender-600 text-white rounded-2xl transition-colors duration-200 shadow-sm"
+                  className="flex-1 py-3 text-sm font-extrabold bg-frida-primary hover:bg-frida-primary/95 text-light-text rounded-2xl transition-all duration-300 ease-in-out shadow-sm shadow-frida-secondary/25"
                 >
                   Crear Materia
                 </button>

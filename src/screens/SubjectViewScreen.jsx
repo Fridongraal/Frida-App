@@ -72,19 +72,19 @@ export default function SubjectViewScreen({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-450 uppercase tracking-wider">
             Mazos
           </span>
           <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{stats.deckCount}</span>
         </div>
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-450 uppercase tracking-wider">
             Tarjetas
           </span>
           <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{stats.cardCount}</span>
         </div>
-        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
           <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-455 uppercase tracking-wider">
             Pendientes Hoy
           </span>
@@ -110,8 +110,8 @@ export default function SubjectViewScreen({
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-lavender-950/20 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-colors duration-300">
+        <div className="fixed inset-0 bg-light-bg/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-colors duration-300">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 p-2 text-warmgray-400 dark:text-warmgray-500 hover:text-light-text dark:hover:text-white hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 rounded-xl transition-all"
@@ -121,12 +121,12 @@ export default function SubjectViewScreen({
 
             <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-1">Crear Nuevo Mazo</h3>
             <p className="text-xs text-warmgray-450 mb-6">
-              Este mazo quedará asociado a <span className="font-semibold text-frida-primary dark:text-frida-secondary">{subject.name}</span>.
+              Este mazo quedará asociado a <span className="font-semibold text-frida-primary dark:text-dark-muted">{subject.name}</span>.
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-frida-primary dark:text-dark-muted uppercase tracking-wider mb-1">
                   Nombre del mazo
                 </label>
                 <input
@@ -135,7 +135,7 @@ export default function SubjectViewScreen({
                   placeholder="Ej. Verbos Irregulares, Anatomía..."
                   value={newDeckName}
                   onChange={(e) => setNewDeckName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/60 focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-dark-muted focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
                 />
               </div>
 
