@@ -4,7 +4,7 @@ import DeckList from '../components/DeckList';
 import { getSubjectSummary } from '../utils/fridaStore';
 
 export default function SubjectViewScreen({
-  folder,
+  subject,
   decks,
   onCreateDeck,
   onDeleteDeck,
@@ -15,22 +15,13 @@ export default function SubjectViewScreen({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
 
-  const stats = getSubjectSummary(
-    {
-      ...folder,
-      decks: decks.map((deck) => ({
-        ...deck,
-        cards: deck.cards || [],
-      })),
-    },
-    new Date()
-  );
+  const stats = getSubjectSummary(subject, new Date());
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newDeckName.trim()) return;
 
-    onCreateDeck(folder.id, newDeckName.trim());
+    onCreateDeck(subject.id, newDeckName.trim());
     setNewDeckName('');
     setIsModalOpen(false);
   };
@@ -48,7 +39,7 @@ export default function SubjectViewScreen({
           </button>
 
           <h1 className="text-3xl font-extrabold text-lavender-950 tracking-tight flex items-center gap-3">
-            <span>{folder.name}</span>
+            <span>{subject.name}</span>
             <span className="text-sm font-bold bg-lavender-100 text-lavender-700 px-2.5 py-0.5 rounded-full">
               Materia
             </span>
@@ -117,7 +108,7 @@ export default function SubjectViewScreen({
 
             <h3 className="text-xl font-bold text-lavender-950 mb-1">Crear Nuevo Mazo</h3>
             <p className="text-xs text-warmgray-400 mb-6">
-              Este mazo quedará asociado a <span className="font-semibold text-lavender-700">{folder.name}</span>.
+              Este mazo quedará asociado a <span className="font-semibold text-lavender-700">{subject.name}</span>.
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -157,3 +148,4 @@ export default function SubjectViewScreen({
     </div>
   );
 }
+

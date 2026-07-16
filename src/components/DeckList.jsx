@@ -1,10 +1,7 @@
 import React from 'react';
 import { BookOpen, PlusCircle, Trash2, Layers } from 'lucide-react';
-import { isCardDue as isCardDueHelper } from '../utils/fridaStore';
+import { getDeckSummary, isCardDue as isCardDueHelper } from '../utils/fridaStore';
 
-/**
- * Función para verificar si una tarjeta está pendiente para estudio hoy.
- */
 export function isCardDue(card) {
   return isCardDueHelper(card, new Date());
 }
@@ -27,8 +24,7 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
       {decks.map((deck) => {
-        const totalCards = deck.cards?.length || 0;
-        const dueCards = deck.cards?.filter(isCardDue).length || 0;
+        const { cardCount: totalCards, dueCards } = getDeckSummary(deck);
 
         return (
           <div
@@ -36,7 +32,6 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
             className="group relative flex flex-col justify-between p-6 bg-white rounded-3xl border border-lavender-100 shadow-sm hover:shadow-md hover:border-lavender-200 transition-all duration-300"
           >
             <div>
-              {/* Encabezado del Mazo */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-lavender-50 rounded-xl flex items-center justify-center text-lavender-500 group-hover:bg-lavender-100 transition-colors">
@@ -46,8 +41,7 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
                     {deck.name}
                   </h3>
                 </div>
-                
-                {/* Botón Eliminar */}
+
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -62,13 +56,11 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
                 </button>
               </div>
 
-              {/* Descripción */}
               <p className="text-sm text-warmgray-400 line-clamp-2 mb-6 h-10">
-                {deck.description || 'Sin descripción.'}
+                Sin descripción.
               </p>
             </div>
 
-            {/* Estadísticas y Acciones */}
             <div className="flex items-end justify-between mt-auto">
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-warmgray-400 font-medium">Tarjetas</span>
@@ -86,7 +78,6 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
                 </div>
               </div>
 
-              {/* Botones de acción */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onAddCard(deck.id)}
@@ -116,3 +107,4 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {
     </div>
   );
 }
+

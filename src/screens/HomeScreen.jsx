@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
 import { FolderPlus, Layers, X, ChevronRight, AlertCircle } from 'lucide-react';
-import { isCardDue } from '../components/DeckList';
 import { getSubjectSummary } from '../utils/fridaStore';
 
-export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolder }) {
+export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
+  const [newSubjectName, setNewSubjectName] = useState('');
 
-  const totalFolders = folders.length;
+  const totalSubjects = subjects.length;
   const totalDecks = decks.length;
-  const totalDue = decks.reduce(
-    (acc, deck) => acc + (deck.cards?.filter(isCardDue).length || 0),
-    0
-  );
+  const totalDue = subjects.reduce((acc, subject) => acc + getSubjectSummary(subject).dueCards, 0);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!newFolderName.trim()) return;
+    if (!newSubjectName.trim()) return;
 
-    onCreateFolder(newFolderName.trim());
-    setNewFolderName('');
+    onCreateSubject(newSubjectName.trim());
+    setNewSubjectName('');
     setIsModalOpen(false);
   };
 
@@ -52,7 +48,7 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
           <span className="text-xs font-semibold text-warmgray-400 uppercase tracking-wider">
             Materias
           </span>
-          <span className="text-2xl font-bold text-lavender-900 mt-2">{totalFolders}</span>
+          <span className="text-2xl font-bold text-lavender-900 mt-2">{totalSubjects}</span>
         </div>
         <div className="bg-white rounded-3xl border border-lavender-100 p-5 shadow-sm flex flex-col justify-between">
           <span className="text-xs font-semibold text-warmgray-400 uppercase tracking-wider">
@@ -76,14 +72,14 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
           <h2 className="text-xl font-bold text-lavender-950">Tus Materias</h2>
         </div>
 
-        {folders.length === 0 ? (
+        {subjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-lavender-100 shadow-sm animate-fade-in">
             <div className="w-16 h-16 bg-lavender-50 rounded-2xl flex items-center justify-center text-lavender-400 mb-4">
               <AlertCircle size={32} />
             </div>
             <h3 className="text-xl font-semibold text-lavender-950 mb-2">No tienes materias aún</h3>
             <p className="text-warmgray-400 max-w-sm mb-6">
-              Crea tu primera carpeta para empezar a organizar mazos por tema.
+              Crea tu primera materia para empezar a organizar mazos por tema.
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
@@ -94,24 +90,13 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
-            {folders.map((folder) => {
-              const stats = getSubjectSummary(
-                {
-                  ...folder,
-                  decks: decks
-                    .filter((deck) => deck.folderId === folder.id)
-                    .map((deck) => ({
-                      ...deck,
-                      cards: deck.cards || [],
-                    })),
-                },
-                new Date()
-              );
+            {subjects.map((subject) => {
+              const stats = getSubjectSummary(subject, new Date());
 
               return (
                 <button
-                  key={folder.id}
-                  onClick={() => onOpenFolder(folder.id)}
+                  key={subject.id}
+                  onClick={() => onOpenSubject(subject.id)}
                   className="text-left group relative flex flex-col justify-between p-6 bg-white rounded-3xl border border-lavender-100 shadow-sm hover:shadow-md hover:border-lavender-200 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -120,7 +105,7 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
                         <Layers size={22} />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-lavender-950">{folder.name}</h3>
+                        <h3 className="text-xl font-bold text-lavender-950">{subject.name}</h3>
                         <p className="text-sm text-warmgray-400 mt-1">
                           {stats.deckCount} mazo{stats.deckCount === 1 ? '' : 's'} dentro de esta materia
                         </p>
@@ -187,8 +172,8 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
                   type="text"
                   required
                   placeholder="Ej. Programación, Inglés, Medicina..."
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 border border-lavender-100 focus:border-lavender-400 focus:bg-white text-sm text-lavender-950 focus:outline-none transition-all"
                 />
               </div>
@@ -215,3 +200,4 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
     </div>
   );
 }
+

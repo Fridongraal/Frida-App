@@ -306,24 +306,3 @@ export function getDeckSummary(deck, asOf = new Date()) {
 
   return { cardCount, dueCards };
 }
-
-export function flattenStore(store) {
-  const normalized = normalizeStore(store);
-
-  return normalized.subjects.flatMap((subject) =>
-    subject.decks.map((deck) => ({
-      ...deck,
-      subjectId: subject.id,
-      folderId: subject.id,
-      description: '',
-      cards: deck.cards.map((card) => ({
-        ...card,
-        interval: card.algorithm.interval,
-        easeFactor: card.algorithm.easeFactor,
-        repetitions: card.algorithm.repetitions,
-        nextReviewDate: card.algorithm.nextReviewDate,
-      })),
-    }))
-  );
-}
-

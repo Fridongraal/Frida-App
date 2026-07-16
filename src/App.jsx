@@ -8,18 +8,18 @@ import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const {
-    folders,
+    subjects,
     decks,
     loading,
-    createFolder,
-    createDeck,
+    addSubject,
+    addDeckToSubject,
     deleteDeck,
-    addCard,
+    addCardToDeck,
     reviewCard,
     deleteCard
   } = useFridaData();
   const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study'
-  const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [selectedSubjectId, setSelectedSubjectId] = useState(null);
   const [selectedDeckId, setSelectedDeckId] = useState(null);
 
   // Pantalla de carga estética
@@ -37,26 +37,25 @@ export default function App() {
     );
   }
 
-  // Buscar la carpeta y el mazo seleccionados actualmente
-  const selectedFolder = folders.find((folder) => folder.id === selectedFolderId);
+  const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId);
   const selectedDeck = decks.find((d) => d.id === selectedDeckId);
 
   const navigateToHome = () => {
     setCurrentScreen('home');
     setSelectedDeckId(null);
-    setSelectedFolderId(null);
+    setSelectedSubjectId(null);
   };
 
-  const navigateToSubject = (folderId) => {
-    setSelectedFolderId(folderId);
+  const navigateToSubject = (subjectId) => {
+    setSelectedSubjectId(subjectId);
     setSelectedDeckId(null);
     setCurrentScreen('subject');
   };
 
   const navigateToCreateCard = (deckId) => {
     const deck = decks.find((item) => item.id === deckId);
-    if (deck?.folderId) {
-      setSelectedFolderId(deck.folderId);
+    if (deck?.subjectId) {
+      setSelectedSubjectId(deck.subjectId);
     }
     setSelectedDeckId(deckId);
     setCurrentScreen('create-card');
@@ -64,15 +63,15 @@ export default function App() {
 
   const navigateToStudy = (deckId) => {
     const deck = decks.find((item) => item.id === deckId);
-    if (deck?.folderId) {
-      setSelectedFolderId(deck.folderId);
+    if (deck?.subjectId) {
+      setSelectedSubjectId(deck.subjectId);
     }
     setSelectedDeckId(deckId);
     setCurrentScreen('study');
   };
 
   const navigateBackFromDetail = () => {
-    if (selectedFolderId) {
+    if (selectedSubjectId) {
       setSelectedDeckId(null);
       setCurrentScreen('subject');
     } else {
@@ -86,18 +85,18 @@ export default function App() {
       <main className="flex-1 overflow-hidden relative">
         {currentScreen === 'home' && (
           <HomeScreen
-            folders={folders}
+            subjects={subjects}
             decks={decks}
-            onCreateFolder={createFolder}
-            onOpenFolder={navigateToSubject}
+            onCreateSubject={addSubject}
+            onOpenSubject={navigateToSubject}
           />
         )}
 
-        {currentScreen === 'subject' && selectedFolder && (
+        {currentScreen === 'subject' && selectedSubject && (
           <SubjectViewScreen
-            folder={selectedFolder}
-            decks={decks.filter((deck) => deck.folderId === selectedFolder.id)}
-            onCreateDeck={createDeck}
+            subject={selectedSubject}
+            decks={decks.filter((deck) => deck.subjectId === selectedSubject.id)}
+            onCreateDeck={addDeckToSubject}
             onDeleteDeck={deleteDeck}
             onStudy={navigateToStudy}
             onAddCard={navigateToCreateCard}
@@ -107,10 +106,10 @@ export default function App() {
 
         {currentScreen === 'create-card' && (
           <CreateCardScreen
-            folders={folders}
+            subjects={subjects}
             decks={decks}
             selectedDeckId={selectedDeckId}
-            onAddCard={addCard}
+            onAddCard={addCardToDeck}
             onDeleteCard={deleteCard}
             onBack={navigateBackFromDetail}
           />

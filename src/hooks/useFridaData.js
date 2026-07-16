@@ -16,9 +16,7 @@ function toFlatDecks(subjects) {
   return subjects.flatMap((subject) =>
     subject.decks.map((deck) => ({
       ...deck,
-      folderId: subject.id,
       subjectId: subject.id,
-      description: '',
       cards: deck.cards.map((card) => ({
         ...card,
         interval: card.algorithm.interval,
@@ -134,15 +132,11 @@ export function useFridaData() {
   return {
     store,
     subjects,
-    folders: subjects,
     decks,
     loading,
     addSubject: createSubject,
-    createFolder: createSubject,
     addDeckToSubject: createDeck,
-    createDeck,
     addCardToDeck: addCard,
-    addCard,
     updateCardAlgorithm: (subjectId, deckId, cardId, updatedAlgorithm) =>
       persistStore(updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlgorithm)),
     reviewCard,

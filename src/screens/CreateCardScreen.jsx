@@ -3,7 +3,7 @@ import { ArrowLeft, Sparkles, AlertCircle, BookOpen, Trash2 } from 'lucide-react
 import { isCardDue } from '../components/DeckList';
 
 export default function CreateCardScreen({
-  folders,
+  subjects,
   decks,
   selectedDeckId,
   onAddCard,
@@ -33,18 +33,18 @@ export default function CreateCardScreen({
     [decks, activeDeckId]
   );
 
-  const selectedFolder = useMemo(
-    () => folders.find((folder) => folder.id === selectedDeck?.folderId),
-    [folders, selectedDeck]
+  const selectedSubject = useMemo(
+    () => subjects.find((subject) => subject.id === selectedDeck?.subjectId),
+    [subjects, selectedDeck]
   );
 
   const groupedDecks = useMemo(
     () =>
-      folders.map((folder) => ({
-        folder,
-        decks: decks.filter((deck) => deck.folderId === folder.id),
+      subjects.map((subject) => ({
+        subject,
+        decks: decks.filter((deck) => deck.subjectId === subject.id),
       })),
-    [folders, decks]
+    [subjects, decks]
   );
 
   if (decks.length === 0 || !selectedDeck) {
@@ -118,9 +118,9 @@ export default function CreateCardScreen({
               onChange={(e) => setActiveDeckId(e.target.value)}
               className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 border border-lavender-100 focus:border-lavender-400 focus:bg-white text-sm text-lavender-950 focus:outline-none transition-all"
             >
-              {groupedDecks.map(({ folder, decks: folderDecks }) => (
-                <optgroup key={folder.id} label={folder.name}>
-                  {folderDecks.map((deck) => (
+              {groupedDecks.map(({ subject, decks: subjectDecks }) => (
+                <optgroup key={subject.id} label={subject.name}>
+                  {subjectDecks.map((deck) => (
                     <option key={deck.id} value={deck.id}>
                       {deck.name}
                     </option>
@@ -129,10 +129,10 @@ export default function CreateCardScreen({
               ))}
             </select>
 
-            {selectedFolder && (
+            {selectedSubject && (
               <div className="mt-3 flex items-center gap-2 text-xs text-warmgray-400">
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-lavender-50 text-lavender-700 border border-lavender-100">
-                  Materia: {selectedFolder.name}
+                  Materia: {selectedSubject.name}
                 </span>
                 <span>{selectedDeck.cards?.filter(isCardDue).length || 0} pendientes en este mazo</span>
               </div>
@@ -243,3 +243,4 @@ export default function CreateCardScreen({
     </div>
   );
 }
+
