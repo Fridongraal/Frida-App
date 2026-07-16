@@ -8,6 +8,7 @@ import {
   Check,
   ArrowRight,
   Layers,
+  LogOut,
 } from 'lucide-react';
 import Flashcard from './Flashcard';
 import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
@@ -103,10 +104,18 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const [sessionStates, setSessionStates] = useState({});
   const [activeShortcut, setActiveShortcut] = useState(null);
   const [strictlyDueCount, setStrictlyDueCount] = useState(0);
+  const [isSavingAndExiting, setIsSavingAndExiting] = useState(false);
 
   const activeShortcutTimerRef = useRef(null);
   const lastDeckIdRef = useRef(null);
   const flippedAtRef = useRef(0);
+
+  const handleSaveAndExit = () => {
+    setIsSavingAndExiting(true);
+    setTimeout(() => {
+      onBack();
+    }, 600);
+  };
 
   useEffect(() => {
     return () => {
@@ -258,6 +267,20 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleRate, isFlipped, pulseShortcut, sessionCompleted, started]);
 
+  if (isSavingAndExiting) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
+        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mb-6 animate-pulse">
+          <CheckCircle2 size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">Progreso guardado</h2>
+        <p className="text-warmgray-455 dark:text-warmgray-450 text-sm">
+          Saliendo de la sesión de estudio...
+        </p>
+      </div>
+    );
+  }
+
   if (!hadCardsToStudy) {
     return (
       <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
@@ -381,11 +404,11 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
       <div className="w-full flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-400 dark:hover:text-frida-secondary transition-colors text-sm font-medium"
+            onClick={handleSaveAndExit}
+            className="flex items-center gap-2 px-3 py-1.5 bg-frida-secondary/15 dark:bg-dark-muted/30 hover:bg-frida-primary hover:text-light-text dark:hover:bg-frida-primary text-frida-primary dark:text-dark-text border border-frida-primary/20 rounded-xl transition-all duration-200 text-xs font-bold shadow-sm"
           >
-            <ChevronLeft size={18} />
-            <span>Salir del estudio</span>
+            <LogOut size={14} />
+            <span>Guardar y Salir</span>
           </button>
 
           <div className="flex items-center gap-2">
