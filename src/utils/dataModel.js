@@ -1,10 +1,3 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const fs = require('fs');
-
-const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
-const DATA_FILE = path.join(app.getPath('userData'), 'frida-data.json');
-
 function createId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -15,7 +8,7 @@ function normalizeFolder(folder) {
   return {
     id: folder.id || createId('folder'),
     name: folder.name || 'Sin nombre',
-    createdAt: folder.createdAt || new Date().toISOString()
+    createdAt: folder.createdAt || new Date().toISOString(),
   };
 }
 
@@ -30,7 +23,7 @@ function normalizeCard(card, deckId) {
     interval: Number.isFinite(card.interval) ? card.interval : 1,
     easeFactor: Number.isFinite(card.easeFactor) ? card.easeFactor : 2.5,
     repetitions: Number.isFinite(card.repetitions) ? card.repetitions : 0,
-    nextReviewDate: card.nextReviewDate || new Date().toISOString()
+    nextReviewDate: card.nextReviewDate || new Date().toISOString(),
   };
 }
 
@@ -47,11 +40,11 @@ function normalizeDeck(deck, folderId) {
     folderId: deck.folderId || folderId,
     name: deck.name || 'Sin nombre',
     description: deck.description || '',
-    cards
+    cards,
   };
 }
 
-function createInitialData() {
+export function createInitialData() {
   const folderId = 'folder-idiomas';
 
   return {
@@ -59,8 +52,8 @@ function createInitialData() {
       {
         id: folderId,
         name: 'Idiomas',
-        createdAt: new Date().toISOString()
-      }
+        createdAt: new Date().toISOString(),
+      },
     ],
     decks: [
       normalizeDeck(
@@ -78,7 +71,7 @@ function createInitialData() {
               interval: 1,
               easeFactor: 2.5,
               repetitions: 0,
-              nextReviewDate: new Date().toISOString()
+              nextReviewDate: new Date().toISOString(),
             },
             {
               id: 'card-2',
@@ -88,19 +81,9 @@ function createInitialData() {
               interval: 1,
               easeFactor: 2.5,
               repetitions: 0,
-              nextReviewDate: new Date().toISOString()
+              nextReviewDate: new Date().toISOString(),
             },
-            {
-              id: 'card-3',
-              deckId: 'deck-1',
-              front: 'Melancholy',
-              back: 'Melancolía / Tristeza vaga, profunda, sosegada y permanente.',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            }
-          ]
+          ],
         },
         folderId
       ),
@@ -119,7 +102,7 @@ function createInitialData() {
               interval: 1,
               easeFactor: 2.5,
               repetitions: 0,
-              nextReviewDate: new Date().toISOString()
+              nextReviewDate: new Date().toISOString(),
             },
             {
               id: 'card-5',
@@ -129,17 +112,17 @@ function createInitialData() {
               interval: 1,
               easeFactor: 2.5,
               repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            }
-          ]
+              nextReviewDate: new Date().toISOString(),
+            },
+          ],
         },
         folderId
-      )
-    ].filter(Boolean)
+      ),
+    ].filter(Boolean),
   };
 }
 
-function normalizeData(raw) {
+export function normalizeData(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const rawFolders = Array.isArray(source.folders) ? source.folders : [];
   const rawDecks = Array.isArray(source.decks) ? source.decks : [];
@@ -147,7 +130,7 @@ function normalizeData(raw) {
   const folders = rawFolders.map(normalizeFolder).filter(Boolean);
   const fallbackFolderId = folders[0]?.id || 'folder-general';
 
-  const decks = rawDecks
+  const normalizedDecks = rawDecks
     .map((deck) => normalizeDeck(deck, fallbackFolderId))
     .filter(Boolean)
     .map((deck) => {
@@ -158,95 +141,33 @@ function normalizeData(raw) {
   const normalizedFolders =
     folders.length > 0
       ? folders
-      : decks.length > 0
+      : normalizedDecks.length > 0
         ? [
             {
               id: fallbackFolderId,
               name: 'General',
-              createdAt: new Date().toISOString()
-            }
+              createdAt: new Date().toISOString(),
+            },
           ]
         : [];
 
   return {
     folders: normalizedFolders,
-    decks
+    decks: normalizedDecks,
   };
 }
 
-function readData() {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      const defaultData = createInitialData();
-      fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
-      return defaultData;
-    }
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    const normalized = normalizeData(JSON.parse(raw));
-    const parsed = JSON.parse(raw);
-    if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf-8');
-    }
-    return normalized;
-  } catch (err) {
-    console.error('Error loading data:', err);
-    return { folders: [], decks: [] };
-  }
-}
+export function getFolderStats(folderId, decks, isCardDue) {
+  const folderDecks = decks.filter((deck) => deck.folderId === folderId);
 
-// Helper to save data
-function writeData(data) {
-  try {
-    const normalized = normalizeData(data);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf-8');
-    return { success: true };
-  } catch (err) {
-    console.error('Error saving data:', err);
-    return { success: false, error: err.message };
-  }
-}
-
-function createWindow() {
-  const mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
-    minWidth: 850,
-    minHeight: 650,
-    titleBarStyle: 'default',
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false
+  return folderDecks.reduce(
+    (acc, deck) => {
+      const cards = deck.cards || [];
+      acc.deckCount += 1;
+      acc.cardCount += cards.length;
+      acc.dueCards += cards.filter(isCardDue).length;
+      return acc;
     },
-    show: false, // Prevents white screen flash on load
-    backgroundColor: '#fafaf9'
-  });
-
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-  }
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
+    { deckCount: 0, cardCount: 0, dueCards: 0 }
+  );
 }
-
-app.whenReady().then(() => {
-  // Register IPC handlers
-  ipcMain.handle('load-data', () => readData());
-  ipcMain.handle('save-data', (event, data) => writeData(data));
-
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});

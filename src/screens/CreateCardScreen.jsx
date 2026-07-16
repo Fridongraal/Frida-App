@@ -1,17 +1,60 @@
-import React, { useState, useRef } from 'react';
-import { ArrowLeft, Plus, Sparkles, AlertCircle, BookOpen, Trash2 } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Sparkles, AlertCircle, BookOpen, Trash2 } from 'lucide-react';
+import { isCardDue } from '../components/DeckList';
 
-export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard }) {
+export default function CreateCardScreen({
+  folders,
+  decks,
+  selectedDeckId,
+  onAddCard,
+  onBack,
+  onDeleteCard,
+}) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [activeDeckId, setActiveDeckId] = useState(selectedDeckId || decks[0]?.id || '');
   const frontInputRef = useRef(null);
 
-  if (!deck) {
+  useEffect(() => {
+    if (selectedDeckId) {
+      setActiveDeckId(selectedDeckId);
+      return;
+    }
+
+    const activeDeckExists = decks.some((deck) => deck.id === activeDeckId);
+    if (!activeDeckExists && decks.length > 0) {
+      setActiveDeckId(decks[0].id);
+    }
+  }, [selectedDeckId, decks, activeDeckId]);
+
+  const selectedDeck = useMemo(
+    () => decks.find((deck) => deck.id === activeDeckId),
+    [decks, activeDeckId]
+  );
+
+  const selectedFolder = useMemo(
+    () => folders.find((folder) => folder.id === selectedDeck?.folderId),
+    [folders, selectedDeck]
+  );
+
+  const groupedDecks = useMemo(
+    () =>
+      folders.map((folder) => ({
+        folder,
+        decks: decks.filter((deck) => deck.folderId === folder.id),
+      })),
+    [folders, decks]
+  );
+
+  if (decks.length === 0 || !selectedDeck) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center h-[70vh]">
         <AlertCircle className="text-red-500 mb-4" size={32} />
-        <h2 className="text-xl font-bold text-lavender-950">Mazo no encontrado</h2>
+        <h2 className="text-xl font-bold text-lavender-950">No hay mazos disponibles</h2>
+        <p className="text-sm text-warmgray-400 mt-2 max-w-sm">
+          Primero crea una materia y un mazo antes de añadir tarjetas.
+        </p>
         <button onClick={onBack} className="mt-4 px-4 py-2 bg-lavender-500 text-white rounded-xl">
           Volver
         </button>
@@ -21,12 +64,10 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
 
   const handleSave = (e, shouldClose) => {
     e.preventDefault();
-    if (!front.trim() || !back.trim()) return;
+    if (!front.trim() || !back.trim() || !selectedDeck) return;
 
-    // Guardar tarjeta
-    onAddCard(deck.id, front.trim(), back.trim());
+    onAddCard(selectedDeck.id, front.trim(), back.trim());
 
-    // Resetear form
     setFront('');
     setBack('');
     setShowSuccess(true);
@@ -35,42 +76,70 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
     if (shouldClose) {
       onBack();
     } else {
-      // Devolver foco al anverso para ingresar la siguiente rápido
       frontInputRef.current?.focus();
     }
   };
 
-  const totalCards = deck.cards?.length || 0;
+  const totalCards = selectedDeck.cards?.length || 0;
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-6 py-8 overflow-hidden animate-fade-in">
-      {/* Botón Volver */}
+    <div className="flex flex-col h-full max-w-4xl mx-auto px-6 py-8 overflow-hidden animate-fade-in">
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-warmgray-400 hover:text-lavender-900 transition-colors text-sm font-medium mb-6 self-start"
       >
         <ArrowLeft size={18} />
-        <span>Volver a Inicio</span>
+        <span>Volver</span>
       </button>
 
-      {/* Título de la sección */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-lavender-950 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-lavender-950 flex items-center gap-2 flex-wrap">
           <span>Añadir Tarjetas</span>
           <span className="text-sm font-semibold bg-lavender-50 text-lavender-600 px-3 py-1 rounded-full border border-lavender-100">
-            {deck.name}
+            {selectedDeck.name}
           </span>
         </h2>
         <p className="text-sm text-warmgray-400 mt-1">
-          Escribe la pregunta o concepto en el anverso, y la respuesta o definición en el reverso.
+          Selecciona el mazo destino. La lista está agrupada por materia para mantener el contexto claro.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 flex-1 overflow-hidden">
-        {/* Formulario (Columna Principal) */}
-        <form className="flex flex-col gap-4 md:col-span-3 overflow-y-auto pr-1" onSubmit={(e) => handleSave(e, false)}>
+        <form
+          className="flex flex-col gap-4 md:col-span-3 overflow-y-auto pr-1"
+          onSubmit={(e) => handleSave(e, false)}
+        >
+          <div className="bg-white border border-lavender-100 rounded-3xl p-4 shadow-sm">
+            <label className="block text-xs font-bold text-lavender-800 uppercase tracking-wider mb-2">
+              Mazo destino
+            </label>
+            <select
+              value={activeDeckId}
+              onChange={(e) => setActiveDeckId(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 border border-lavender-100 focus:border-lavender-400 focus:bg-white text-sm text-lavender-950 focus:outline-none transition-all"
+            >
+              {groupedDecks.map(({ folder, decks: folderDecks }) => (
+                <optgroup key={folder.id} label={folder.name}>
+                  {folderDecks.map((deck) => (
+                    <option key={deck.id} value={deck.id}>
+                      {deck.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+
+            {selectedFolder && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-warmgray-400">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-lavender-50 text-lavender-700 border border-lavender-100">
+                  Materia: {selectedFolder.name}
+                </span>
+                <span>{selectedDeck.cards?.filter(isCardDue).length || 0} pendientes en este mazo</span>
+              </div>
+            )}
+          </div>
+
           <div className="flex-1 flex flex-col gap-4">
-            {/* ANVERSO */}
             <div>
               <label className="block text-xs font-bold text-lavender-800 uppercase tracking-wider mb-1">
                 Anverso (Pregunta / Concepto)
@@ -86,7 +155,6 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
               />
             </div>
 
-            {/* REVERSO */}
             <div>
               <label className="block text-xs font-bold text-lavender-800 uppercase tracking-wider mb-1">
                 Reverso (Respuesta / Definición)
@@ -102,7 +170,6 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
             </div>
           </div>
 
-          {/* Mensaje de Éxito Temporal */}
           <div className="h-6 flex items-center justify-center">
             {showSuccess && (
               <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full animate-fade-in flex items-center gap-1">
@@ -111,7 +178,6 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
             )}
           </div>
 
-          {/* Botones de acción */}
           <div className="flex items-center gap-3">
             <button
               type="submit"
@@ -129,7 +195,6 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
           </div>
         </form>
 
-        {/* Tarjetas Existentes en este mazo (Columna Lateral) */}
         <div className="md:col-span-2 bg-white rounded-3xl border border-lavender-100 p-4 flex flex-col overflow-hidden shadow-sm h-full max-h-[400px] md:max-h-none">
           <div className="flex items-center justify-between mb-3 border-b border-lavender-50 pb-2">
             <span className="text-xs font-bold text-lavender-850 uppercase tracking-wider">
@@ -141,8 +206,8 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
           </div>
 
           <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
-            {deck.cards && deck.cards.length > 0 ? (
-              deck.cards.slice().reverse().map((card) => (
+            {selectedDeck.cards && selectedDeck.cards.length > 0 ? (
+              selectedDeck.cards.slice().reverse().map((card) => (
                 <div
                   key={card.id}
                   className="flex items-center justify-between p-2.5 bg-warmgray-50 rounded-xl hover:bg-lavender-50/50 transition-colors border border-transparent hover:border-lavender-100 group"
@@ -155,7 +220,7 @@ export default function CreateCardScreen({ deck, onAddCard, onBack, onDeleteCard
                     <button
                       onClick={() => {
                         if (confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
-                          onDeleteCard(deck.id, card.id);
+                          onDeleteCard(selectedDeck.id, card.id);
                         }
                       }}
                       className="p-1.5 text-warmgray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors md:opacity-0 group-hover:opacity-100 focus:opacity-100"
