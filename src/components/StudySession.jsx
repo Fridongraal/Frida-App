@@ -7,9 +7,10 @@ import {
   RotateCcw,
   Check,
   ArrowRight,
+  Layers,
 } from 'lucide-react';
 import Flashcard from './Flashcard';
-import { filterCards } from '../utils/fridaStore';
+import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
 import { applyStudyAction, getStudyActionPreview } from '../utils/fridaReview';
 
 function buildInitialSessionState(cards) {
@@ -31,19 +32,11 @@ function getCardCategoryInfo(card) {
   if (!card) return { label: '', classes: '' };
 
   const reps = card.algorithm?.repetitions ?? 0;
-  const interval = card.algorithm?.interval ?? 1;
 
-  if (reps === 0 && interval >= 1) {
+  if (reps === 0) {
     return {
       label: 'Nueva',
       classes: 'bg-lavender-100 dark:bg-lavender-950/40 text-lavender-700 dark:text-lavender-300 border border-lavender-200/50 dark:border-lavender-900/50',
-    };
-  }
-
-  if (interval < 1 || reps === 0) {
-    return {
-      label: 'En aprendizaje',
-      classes: 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 border border-rose-100 dark:border-rose-900/40',
     };
   }
 
@@ -109,6 +102,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const [counts, setCounts] = useState({ newCount: 0, learningCount: 0, reviewCount: 0 });
   const [sessionStates, setSessionStates] = useState({});
   const [activeShortcut, setActiveShortcut] = useState(null);
+  const [strictlyDueCount, setStrictlyDueCount] = useState(0);
 
   const activeShortcutTimerRef = useRef(null);
   const lastDeckIdRef = useRef(null);
@@ -131,17 +125,17 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
 
     lastDeckIdRef.current = deck.id;
 
-    const { newCards, learningCards, reviewCards, total } = filterCards(deck, new Date());
-    const queue = [...learningCards, ...newCards, ...reviewCards];
+    const { queue, strictlyDueCount, dueCardsCount, newCardsCount } = getPrioritizedQueue(deck, new Date());
 
     setCounts({
-      newCount: newCards.length,
-      learningCount: learningCards.length,
-      reviewCount: reviewCards.length,
+      newCount: newCardsCount,
+      learningCount: 0,
+      reviewCount: dueCardsCount,
     });
     setDueCards(queue);
+    setStrictlyDueCount(strictlyDueCount);
     setCurrentIndex(0);
-    setHadCardsToStudy(total > 0);
+    setHadCardsToStudy(deck.cards.length > 0);
     setSessionCompleted(false);
     setStarted(false);
     setStats({ dificil: 0, bien: 0, facil: 0 });
@@ -267,18 +261,18 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   if (!hadCardsToStudy) {
     return (
       <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
-        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 size={32} />
+        <div className="w-16 h-16 bg-frida-secondary/15 dark:bg-frida-primary/10 text-frida-primary rounded-2xl flex items-center justify-center mb-6">
+          <Layers size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">¡Todo al día!</h2>
+        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">El mazo está vacío</h2>
         <p className="text-warmgray-450 dark:text-warmgray-450 max-w-sm mb-8 text-sm">
-          ¡Felicidades! Estás al día con este mazo. Vuelve más tarde o mañana para repasar.
+          Añade o importa algunas tarjetas para poder comenzar a estudiar en este mazo.
         </p>
         <button
           onClick={onBack}
-          className="px-6 py-3 bg-frida-primary hover:bg-frida-primary/90 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/25"
+          className="px-6 py-3 bg-frida-primary hover:bg-frida-primary/90 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/25 text-sm"
         >
-          Volver al Inicio
+          Volver
         </button>
       </div>
     );
@@ -292,7 +286,13 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
           Estás por comenzar tu sesión de estudio. Revisa el estado de tus tarjetas a continuación:
         </p>
 
-        <div className="grid grid-cols-3 gap-4 w-full mb-10">
+        {strictlyDueCount === 0 && (
+          <p className="text-xs font-semibold text-frida-primary dark:text-frida-secondary mb-6 bg-frida-secondary/15 px-4 py-2.5 rounded-2xl">
+            ✨ Estás al día con este mazo. Al comenzar, repasarás tarjetas futuras de forma adelantada.
+          </p>
+        )}
+
+        <div className="grid grid-cols-2 gap-4 w-full mb-10">
           <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-light-text dark:text-frida-secondary">{counts.newCount}</span>
             <span className="text-[10px] font-bold text-light-text/75 dark:text-frida-secondary/80 uppercase tracking-wider mt-1">
@@ -300,17 +300,10 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-accent/80 dark:bg-frida-accent/20 border border-frida-accent/30 dark:border-dark-muted rounded-2xl">
-            <span className="text-2xl font-bold text-sky-900 dark:text-frida-accent">{counts.learningCount}</span>
-            <span className="text-[10px] font-bold text-sky-950/75 dark:text-frida-accent/80 uppercase tracking-wider mt-1">
-              Aprendizaje
-            </span>
-          </div>
-
           <div className="flex flex-col items-center justify-center p-4 bg-frida-success/80 dark:bg-frida-success/20 border border-frida-success/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-green-900 dark:text-green-300">{counts.reviewCount}</span>
             <span className="text-[10px] font-bold text-green-950/75 dark:text-green-400 uppercase tracking-wider mt-1">
-              Repasar
+              Repaso
             </span>
           </div>
         </div>
@@ -341,9 +334,9 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         <div className="w-20 h-20 bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary rounded-3xl flex items-center justify-center mb-6 shadow-sm">
           <Sparkles size={40} className="text-frida-primary" />
         </div>
-        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">¡Buen trabajo!</h2>
+        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">¡Mazo completado!</h2>
         <p className="text-warmgray-450 dark:text-warmgray-400 mb-6 text-sm">
-          Has completado todas las tarjetas pendientes de este mazo por hoy.
+          Has repasado la totalidad de las tarjetas en este mazo.
         </p>
 
         {totalEstudiadas > 0 && (
@@ -420,6 +413,18 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
           />
         </div>
       </div>
+
+      {strictlyDueCount > 0 && currentIndex >= strictlyDueCount && (
+        <div className="w-full bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 text-green-800 dark:text-green-300 px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm flex items-center justify-center gap-2 mb-2 animate-bounce">
+          <span>🎉🎉 ¡Completaste las tarjetas programadas para hoy! Puedes salir o continuar repasando el resto del mazo.</span>
+        </div>
+      )}
+
+      {strictlyDueCount === 0 && (
+        <div className="w-full bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 text-frida-primary dark:text-frida-secondary px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm mb-2">
+          <span>⚡ Estás adelantando repasos futuros. Tus respuestas actualizarán el algoritmo.</span>
+        </div>
+      )}
 
       <div className="flex-1 flex items-center justify-center my-4">
          {currentCardView && (

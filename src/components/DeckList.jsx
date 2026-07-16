@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookOpen, PlusCircle, Trash2, Layers, Upload } from 'lucide-react';
-import { getDeckSummary, isCardDue as isCardDueHelper } from '../utils/fridaStore';
+import { getPrioritizedQueue, isCardDue as isCardDueHelper } from '../utils/fridaStore';
 
 export function isCardDue(card) {
   return isCardDueHelper(card, new Date());
@@ -24,7 +24,8 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
       {decks.map((deck) => {
-        const { cardCount: totalCards, dueCards } = getDeckSummary(deck);
+        const { strictlyDueCount, dueCardsCount, newCardsCount } = getPrioritizedQueue(deck);
+        const totalCards = deck.cards?.length || 0;
 
         return (
           <div
@@ -66,9 +67,9 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
                 <span className="text-xs text-warmgray-450 dark:text-warmgray-400 font-medium">Tarjetas</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-light-text/80 dark:text-dark-text/85">{totalCards} total</span>
-                  {dueCards > 0 ? (
+                  {strictlyDueCount > 0 ? (
                     <span className="px-2 py-0.5 text-xs font-bold text-sky-850 dark:text-frida-accent bg-frida-accent/30 dark:bg-frida-accent/20 rounded-full animate-pulse">
-                      {dueCards} pendientes
+                      {strictlyDueCount} pendientes
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 text-xs font-bold text-green-800 dark:text-green-300 bg-frida-success/80 dark:bg-frida-success/20 rounded-full">
@@ -97,12 +98,7 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
 
                 <button
                   onClick={() => onStudy(deck.id)}
-                  disabled={dueCards === 0}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-sm transition-all duration-200 ${
-                    dueCards > 0
-                      ? 'bg-frida-primary text-light-text hover:bg-frida-primary/90 hover:shadow-sm shadow-frida-secondary/20'
-                      : 'bg-warmgray-100 dark:bg-dark-muted/20 text-warmgray-450 dark:text-warmgray-500 cursor-not-allowed'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-frida-primary hover:bg-frida-primary/90 hover:shadow-sm shadow-frida-secondary/20 text-light-text font-extrabold rounded-xl text-sm transition-all duration-200"
                 >
                   <BookOpen size={16} />
                   Estudiar

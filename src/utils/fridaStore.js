@@ -368,3 +368,57 @@ export function getDeckSummary(deck, asOf = new Date()) {
 
   return { cardCount, dueCards };
 }
+
+export function getPrioritizedQueue(deck, asOf = new Date()) {
+  const cards = deck?.cards || [];
+  const cutoff = asOf instanceof Date ? asOf.getTime() : new Date(asOf).getTime();
+
+  const dueCards = [];
+  const newCards = [];
+  const futureCards = [];
+
+  for (const card of cards) {
+    const reps = card.algorithm?.repetitions ?? card.repetitions ?? 0;
+    const nextReviewDate = card.algorithm?.nextReviewDate || card.nextReviewDate;
+
+    if (reps === 0) {
+      newCards.push(card);
+    } else {
+      const reviewTime = nextReviewDate ? new Date(nextReviewDate).getTime() : 0;
+      if (reviewTime <= cutoff) {
+        dueCards.push(card);
+      } else {
+        futureCards.push(card);
+      }
+    }
+  }
+
+  // Sort dueCards: smaller interval first, then smaller easeFactor
+  dueCards.sort((a, b) => {
+    const intA = a.algorithm?.interval ?? a.interval ?? 1;
+    const intB = b.algorithm?.interval ?? b.interval ?? 1;
+    if (intA !== intB) return intA - intB;
+
+    const easeA = a.algorithm?.easeFactor ?? a.easeFactor ?? 2.5;
+    const easeB = b.algorithm?.easeFactor ?? b.easeFactor ?? 2.5;
+    return easeA - easeB;
+  });
+
+  // Sort futureCards: closest date first
+  futureCards.sort((a, b) => {
+    const dateA = new Date(a.algorithm?.nextReviewDate || a.nextReviewDate || 0).getTime();
+    const dateB = new Date(b.algorithm?.nextReviewDate || b.nextReviewDate || 0).getTime();
+    return dateA - dateB;
+  });
+
+  const queue = [...dueCards, ...newCards, ...futureCards];
+  const strictlyDueCount = dueCards.length + newCards.length;
+
+  return {
+    queue,
+    strictlyDueCount,
+    dueCardsCount: dueCards.length,
+    newCardsCount: newCards.length,
+    futureCardsCount: futureCards.length
+  };
+}

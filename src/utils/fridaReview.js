@@ -76,12 +76,13 @@ export function applyStudyAction(card, action, sessionState = {}) {
       interval: 0,
       easeFactor: clampEaseFactor(algorithm.easeFactor - 0.2),
       repetitions: 0,
+      nextReviewDate: nextReviewDateFromDays(0),
     };
 
     return {
       sessionAlgorithm: nextAlgorithm,
       awaitingGraduation: false,
-      persistAlgorithm: null,
+      persistAlgorithm: nextAlgorithm,
       requeueMode: 'short',
     };
   }
