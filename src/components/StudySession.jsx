@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, CheckCircle2, AlertCircle, Sparkles, Smile, RefreshCw } from 'lucide-react';
 import Flashcard from './Flashcard';
 import { filterCards } from '../utils/fridaStore';
@@ -15,9 +15,16 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const [hadCardsToStudy, setHadCardsToStudy] = useState(false);
   const [counts, setCounts] = useState({ newCount: 0, learningCount: 0, reviewCount: 0 });
 
+  const lastDeckIdRef = useRef(null);
+
   // Filtrar tarjetas pendientes al inicio
   useEffect(() => {
     if (deck && deck.cards) {
+      if (lastDeckIdRef.current === deck.id) {
+        return; // Evitar reinicios si es el mismo mazo y solo cambiaron datos de tarjetas
+      }
+      lastDeckIdRef.current = deck.id;
+
       const { newCards, learningCards, reviewCards, total } = filterCards(deck, new Date());
       
       setCounts({
