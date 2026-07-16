@@ -39,9 +39,9 @@ module.exports = {
         'light-bg': '#F7F8FF',
         'light-card': '#FFFFFF',
         'light-text': '#1C1B2E',
-        'dark-bg': '#121358',
-        'dark-card': '#232F72',
-        'dark-muted': '#2F578A',
+        'dark-bg': '#070824',
+        'dark-card': '#10123b',
+        'dark-muted': '#1c245c',
         'dark-text': '#F0F1FF',
       },
       borderRadius: {
