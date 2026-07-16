@@ -10,6 +10,7 @@ import {
   findDeckLocation,
   normalizeStore,
   updateCardAlgorithm,
+  importCardsToDeck,
 } from '../utils/fridaStore';
 
 function toFlatDecks(subjects) {
@@ -137,6 +138,8 @@ export function useFridaData() {
     addSubject: createSubject,
     addDeckToSubject: createDeck,
     addCardToDeck: addCard,
+    importCards: (subjectId, deckId, cards) =>
+      persistStore(importCardsToDeck(store, subjectId, deckId, cards)),
     updateCardAlgorithm: (subjectId, deckId, cardId, updatedAlgorithm) =>
       persistStore(updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlgorithm)),
     reviewCard,

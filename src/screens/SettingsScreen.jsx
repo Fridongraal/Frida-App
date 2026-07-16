@@ -1,0 +1,206 @@
+import React, { useState } from 'react';
+import { ArrowLeft, Sun, Moon, Trash2, Download, ShieldAlert, Check, Sparkles, Settings } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+
+export default function SettingsScreen({ store, onClearData, onBack }) {
+  const { theme, setTheme } = useTheme();
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  const handleExport = () => {
+    try {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `frida-datos-${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      triggerToast('¡Datos exportados con éxito!');
+    } catch (error) {
+      console.error('Error al exportar datos:', error);
+      triggerToast('Error al exportar los datos');
+    }
+  };
+
+  const handleClearData = () => {
+    onClearData();
+    setShowConfirmDelete(false);
+    triggerToast('¡Todos los datos han sido eliminados!');
+  };
+
+  return (
+    <div className="flex flex-col h-full max-w-3xl mx-auto px-6 py-8 overflow-y-auto animate-fade-in text-warmgray-900 dark:text-darkText">
+      {/* Botón de regreso */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-warmgray-400 hover:text-lavender-900 dark:hover:text-lavender-300 transition-colors text-sm font-medium mb-6 self-start"
+      >
+        <ArrowLeft size={18} />
+        <span>Volver al Inicio</span>
+      </button>
+
+      {/* Título de la pantalla */}
+      <div className="flex items-center gap-3 mb-8 border-b border-lavender-100 dark:border-lavender-900 pb-4">
+        <div className="w-12 h-12 bg-lavender-100 dark:bg-lavender-950 rounded-2xl flex items-center justify-center text-lavender-500 dark:text-lavender-400">
+          <Settings size={24} />
+        </div>
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Configuración</h1>
+          <p className="text-sm text-warmgray-400 mt-0.5">
+            Personaliza el tema visual y gestiona tus datos de estudio.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {/* SECCIÓN TEMA */}
+        <section className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 shadow-sm transition-all duration-300">
+          <h2 className="text-lg font-bold text-lavender-950 dark:text-white mb-1 flex items-center gap-2">
+            <span>Tema Visual</span>
+          </h2>
+          <p className="text-xs text-warmgray-400 mb-6">
+            Elige el aspecto visual que mejor se adapte a tu entorno de estudio.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Opción Claro */}
+            <button
+              onClick={() => setTheme('light')}
+              className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
+                theme === 'light'
+                  ? 'border-lavender-500 bg-lavender-50/50 text-lavender-950 dark:text-white shadow-sm'
+                  : 'border-lavender-100 dark:border-lavender-950 hover:bg-warmgray-50 dark:hover:bg-lavender-950/20 text-warmgray-400'
+              }`}
+            >
+              {theme === 'light' && (
+                <span className="absolute top-3 right-3 bg-lavender-500 text-white rounded-full p-0.5">
+                  <Check size={12} strokeWidth={3} />
+                </span>
+              )}
+              <Sun size={28} className={theme === 'light' ? 'text-lavender-500' : 'text-warmgray-400'} />
+              <span className="text-sm font-bold mt-3">Modo Claro</span>
+              <span className="text-[10px] text-warmgray-400 mt-1">Luminoso y limpio</span>
+            </button>
+
+            {/* Opción Oscuro */}
+            <button
+              onClick={() => setTheme('dark')}
+              className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
+                theme === 'dark'
+                  ? 'border-lavender-500 bg-[#221c30]/50 text-white shadow-sm'
+                  : 'border-lavender-100 dark:border-lavender-950 hover:bg-warmgray-50 dark:hover:bg-lavender-950/20 text-warmgray-400'
+              }`}
+            >
+              {theme === 'dark' && (
+                <span className="absolute top-3 right-3 bg-lavender-500 text-white rounded-full p-0.5">
+                  <Check size={12} strokeWidth={3} />
+                </span>
+              )}
+              <Moon size={28} className={theme === 'dark' ? 'text-lavender-400' : 'text-warmgray-400'} />
+              <span className="text-sm font-bold mt-3">Modo Oscuro</span>
+              <span className="text-[10px] text-warmgray-400 mt-1">Relajante y profundo</span>
+            </button>
+          </div>
+        </section>
+
+        {/* SECCIÓN DATOS */}
+        <section className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 shadow-sm transition-all duration-300">
+          <h2 className="text-lg font-bold text-lavender-950 dark:text-white mb-1">Copia de Seguridad y Datos</h2>
+          <p className="text-xs text-warmgray-400 mb-6">
+            Exporta tus tarjetas para guardarlas o limpia la base de datos de la app.
+          </p>
+
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Exportar */}
+            <div className="flex-1 bg-lavender-50/40 dark:bg-lavender-950/10 border border-lavender-100 dark:border-lavender-950 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-lavender-900 dark:text-lavender-200 flex items-center gap-2">
+                  <Download size={16} />
+                  <span>Exportar Datos</span>
+                </h3>
+                <p className="text-xs text-warmgray-450 mt-1.5 leading-relaxed">
+                  Descarga un archivo JSON de respaldo con todas tus materias, mazos e historial de estudio.
+                </p>
+              </div>
+              <button
+                onClick={handleExport}
+                className="mt-5 w-full py-2.5 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+              >
+                Exportar JSON
+              </button>
+            </div>
+
+            {/* Borrar Todo */}
+            <div className="flex-1 bg-red-50/30 dark:bg-red-950/10 border border-red-100 dark:border-red-950/50 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-red-650 dark:text-red-400 flex items-center gap-2">
+                  <Trash2 size={16} />
+                  <span>Restablecer Aplicación</span>
+                </h3>
+                <p className="text-xs text-warmgray-450 mt-1.5 leading-relaxed">
+                  Elimina de manera permanente todas las materias, mazos y tarjetas creadas. Esta acción no se puede deshacer.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowConfirmDelete(true)}
+                className="mt-5 w-full py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+              >
+                Borrar todos mis datos
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 bg-lavender-950 text-white dark:bg-lavender-100 dark:text-lavender-950 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-lavender-800 dark:border-lavender-200">
+          <Sparkles size={16} className="text-lavender-400 dark:text-lavender-600" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN PARA BORRAR */}
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-lavender-950/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 w-full max-w-md shadow-2xl relative animate-slide-up">
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-2xl flex items-center justify-center text-red-500 dark:text-red-400 mb-4 mx-auto">
+              <ShieldAlert size={26} />
+            </div>
+
+            <h3 className="text-xl font-bold text-lavender-950 dark:text-white mb-2 text-center">
+              ¿Estás completamente seguro?
+            </h3>
+            <p className="text-xs text-warmgray-400 mb-6 text-center leading-relaxed">
+              Estás a punto de borrar permanentemente todas las materias, mazos y tarjetas de Frida. 
+              <strong> Esta acción no se puede deshacer.</strong> Te recomendamos exportar tus datos antes de continuar.
+            </p>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmDelete(false)}
+                className="flex-1 py-3 text-sm font-semibold text-warmgray-400 hover:bg-warmgray-100 dark:hover:bg-lavender-950/20 rounded-2xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleClearData}
+                className="flex-1 py-3 text-sm font-bold bg-red-500 hover:bg-red-600 text-white rounded-2xl transition-colors shadow-sm"
+              >
+                Sí, borrar todo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

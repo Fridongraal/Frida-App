@@ -74,12 +74,12 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   // Si no hay tarjetas pendientes al inicio
   if (dueCards.length === 0 && !sessionCompleted) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh]">
-        <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-warmgray-900 dark:text-darkText">
+        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-450 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-lavender-950 mb-2">¡Todo al día!</h2>
-        <p className="text-warmgray-400 mb-8">
+        <h2 className="text-2xl font-bold text-lavender-950 dark:text-white mb-2">¡Todo al día!</h2>
+        <p className="text-warmgray-450 dark:text-warmgray-400 mb-8 text-sm">
           No tienes tarjetas pendientes de repasar en este mazo por hoy. ¡Vuelve más tarde!
         </p>
         <button
@@ -96,33 +96,33 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   if (sessionCompleted) {
     const totalEstudiadas = stats.dificil + stats.bien + stats.facil;
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] animate-fade-in">
-        <div className="w-20 h-20 bg-lavender-50 text-lavender-500 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] animate-fade-in text-warmgray-900 dark:text-darkText">
+        <div className="w-20 h-20 bg-lavender-50 dark:bg-lavender-950/40 text-lavender-500 dark:text-lavender-450 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
           <Sparkles size={40} className="text-lavender-500" />
         </div>
-        <h2 className="text-3xl font-extrabold text-lavender-950 mb-2">¡Buen trabajo!</h2>
-        <p className="text-warmgray-400 mb-6">
+        <h2 className="text-3xl font-extrabold text-lavender-950 dark:text-white mb-2">¡Buen trabajo!</h2>
+        <p className="text-warmgray-450 dark:text-warmgray-400 mb-6 text-sm">
           Has completado todas las tarjetas pendientes de este mazo por hoy.
         </p>
 
         {/* Panel de estadísticas simplificado */}
         {totalEstudiadas > 0 && (
-          <div className="w-full bg-white rounded-3xl border border-lavender-100 p-5 mb-8 shadow-sm">
-            <h3 className="text-sm font-semibold text-lavender-800 mb-4 uppercase tracking-wider">
+          <div className="w-full bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-5 mb-8 shadow-sm transition-colors duration-300">
+            <h3 className="text-sm font-semibold text-lavender-800 dark:text-lavender-400 mb-4 uppercase tracking-wider">
               Resumen de Respuestas
             </h3>
             <div className="grid grid-cols-3 gap-2">
-              <div className="p-3 bg-red-50/50 rounded-2xl">
-                <span className="block text-xl font-bold text-red-500">{stats.dificil}</span>
-                <span className="text-[10px] font-semibold text-red-400 uppercase">Difícil</span>
+              <div className="p-3 bg-red-50/50 dark:bg-red-950/20 rounded-2xl">
+                <span className="block text-xl font-bold text-red-500 dark:text-red-400">{stats.dificil}</span>
+                <span className="text-[10px] font-semibold text-red-400 dark:text-red-500 uppercase">Difícil</span>
               </div>
-              <div className="p-3 bg-lavender-50/50 rounded-2xl">
-                <span className="block text-xl font-bold text-lavender-500">{stats.bien}</span>
-                <span className="text-[10px] font-semibold text-lavender-400 uppercase">Bien</span>
+              <div className="p-3 bg-lavender-50/50 dark:bg-lavender-950/20 rounded-2xl">
+                <span className="block text-xl font-bold text-lavender-500 dark:text-lavender-400">{stats.bien}</span>
+                <span className="text-[10px] font-semibold text-lavender-400 dark:text-lavender-500 uppercase">Bien</span>
               </div>
-              <div className="p-3 bg-green-50/50 rounded-2xl">
-                <span className="block text-xl font-bold text-green-500">{stats.facil}</span>
-                <span className="text-[10px] font-semibold text-green-400 uppercase">Fácil</span>
+              <div className="p-3 bg-green-50/50 dark:bg-green-950/20 rounded-2xl">
+                <span className="block text-xl font-bold text-green-500 dark:text-green-400">{stats.facil}</span>
+                <span className="text-[10px] font-semibold text-green-400 dark:text-green-550 uppercase">Fácil</span>
               </div>
             </div>
           </div>
@@ -142,28 +142,28 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const progressPercent = ((currentIndex) / dueCards.length) * 100;
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-2 justify-between">
+    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-2 justify-between text-warmgray-900 dark:text-darkText">
       {/* Cabecera / Navegación interna */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-warmgray-400 hover:text-lavender-900 transition-colors text-sm font-medium"
+          className="flex items-center gap-1.5 text-warmgray-455 hover:text-lavender-900 dark:text-warmgray-400 dark:hover:text-lavender-350 transition-colors text-sm font-medium"
         >
           <ChevronLeft size={18} />
           <span>Salir del Estudio</span>
         </button>
-        <span className="text-xs font-bold bg-lavender-100 text-lavender-800 px-3 py-1 rounded-full">
+        <span className="text-xs font-bold bg-lavender-100 dark:bg-lavender-950/50 text-lavender-800 dark:text-lavender-300 px-3 py-1 rounded-full">
           Mazo: {deck.name}
         </span>
       </div>
 
       {/* Barra de Progreso */}
       <div className="w-full mb-6">
-        <div className="flex justify-between text-xs text-warmgray-400 mb-1.5 font-semibold">
+        <div className="flex justify-between text-xs text-warmgray-450 dark:text-warmgray-400 mb-1.5 font-semibold">
           <span>Progreso de hoy</span>
           <span>{currentIndex + 1} de {dueCards.length} tarjetas</span>
         </div>
-        <div className="w-full h-2 bg-lavender-50 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-lavender-50 dark:bg-lavender-950/30 rounded-full overflow-hidden">
           <div
             className="h-full bg-lavender-400 transition-all duration-300 rounded-full"
             style={{ width: `${progressPercent || 5}%` }}
@@ -191,7 +191,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
           >
             <RefreshCw size={18} className="animate-spin-slow" />
             <span>Mostrar Respuesta</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 ml-2 text-[10px] font-bold bg-lavender-600 text-lavender-100 rounded">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 ml-2 text-[10px] font-bold bg-lavender-600 dark:bg-lavender-700 text-lavender-100 rounded">
               Espacio
             </kbd>
           </button>
@@ -200,37 +200,37 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
             {/* DIFICIL */}
             <button
               onClick={() => handleRate(1)}
-              className="flex flex-col items-center justify-center p-3 bg-red-50 hover:bg-red-100/80 border border-red-100 rounded-2xl transition-all group"
+              className="flex flex-col items-center justify-center p-3 bg-red-50 dark:bg-red-950/10 hover:bg-red-100/80 dark:hover:bg-red-950/30 border border-red-100 dark:border-red-950/50 rounded-2xl transition-all group"
             >
-              <span className="text-xs font-bold text-red-500 group-hover:scale-105 transition-transform flex items-center gap-1">
+              <span className="text-xs font-bold text-red-500 dark:text-red-400 group-hover:scale-105 transition-transform flex items-center gap-1">
                 Difícil
-                <kbd className="px-1 text-[9px] bg-red-200 text-red-700 rounded font-mono">1</kbd>
+                <kbd className="px-1 text-[9px] bg-red-200 dark:bg-red-900/60 text-red-700 dark:text-red-300 rounded font-mono">1</kbd>
               </span>
-              <span className="text-[10px] text-red-400 mt-1 hidden sm:block">Repetir pronto</span>
+              <span className="text-[10px] text-red-400 dark:text-red-500 mt-1 hidden sm:block">Repetir pronto</span>
             </button>
 
             {/* BIEN */}
             <button
               onClick={() => handleRate(2)}
-              className="flex flex-col items-center justify-center p-3 bg-lavender-50 hover:bg-lavender-100/80 border border-lavender-100 rounded-2xl transition-all group"
+              className="flex flex-col items-center justify-center p-3 bg-lavender-50 dark:bg-lavender-950/10 hover:bg-lavender-100/80 dark:hover:bg-lavender-950/30 border border-lavender-100 dark:border-lavender-950/50 rounded-2xl transition-all group"
             >
-              <span className="text-xs font-bold text-lavender-600 group-hover:scale-105 transition-transform flex items-center gap-1">
+              <span className="text-xs font-bold text-lavender-600 dark:text-lavender-450 group-hover:scale-105 transition-transform flex items-center gap-1">
                 Bien
-                <kbd className="px-1 text-[9px] bg-lavender-200 text-lavender-700 rounded font-mono">2</kbd>
+                <kbd className="px-1 text-[9px] bg-lavender-200 dark:bg-lavender-900/60 text-lavender-750 dark:text-lavender-300 rounded font-mono">2</kbd>
               </span>
-              <span className="text-[10px] text-lavender-400 mt-1 hidden sm:block">Intervalo medio</span>
+              <span className="text-[10px] text-lavender-450 dark:text-lavender-550 mt-1 hidden sm:block">Intervalo medio</span>
             </button>
 
             {/* FACIL */}
             <button
               onClick={() => handleRate(3)}
-              className="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100/80 border border-green-100 rounded-2xl transition-all group"
+              className="flex flex-col items-center justify-center p-3 bg-green-50 dark:bg-green-950/10 hover:bg-green-100/80 dark:hover:bg-green-950/30 border border-green-100 dark:border-green-950/50 rounded-2xl transition-all group"
             >
-              <span className="text-xs font-bold text-green-600 group-hover:scale-105 transition-transform flex items-center gap-1">
+              <span className="text-xs font-bold text-green-600 dark:text-green-400 group-hover:scale-105 transition-transform flex items-center gap-1">
                 Fácil
-                <kbd className="px-1 text-[9px] bg-green-200 text-green-700 rounded font-mono">3</kbd>
+                <kbd className="px-1 text-[9px] bg-green-200 dark:bg-green-900/60 text-green-700 dark:text-green-300 rounded font-mono">3</kbd>
               </span>
-              <span className="text-[10px] text-green-400 mt-1 hidden sm:block">Intervalo largo</span>
+              <span className="text-[10px] text-green-400 dark:text-green-550 mt-1 hidden sm:block">Intervalo largo</span>
             </button>
           </div>
         )}

@@ -13,38 +13,38 @@ export default function Flashcard({ card, isFlipped, onFlip }) {
         }`}
       >
         {/* CARA ANTERIOR (Pregunta) */}
-        <div className="absolute inset-0 w-full h-full backface-hidden bg-white rounded-3xl p-8 border border-lavender-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between items-center text-center">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-lavender-400 tracking-wider uppercase">
+        <div className="absolute inset-0 w-full h-full backface-hidden bg-white dark:bg-darkCard rounded-3xl p-8 border border-lavender-100 dark:border-lavender-950 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between items-center text-center">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-lavender-400 dark:text-lavender-500 tracking-wider uppercase">
             <HelpCircle size={14} />
             <span>Pregunta</span>
           </div>
           
           <div className="flex-1 flex items-center justify-center px-4">
-            <p className="text-2xl font-semibold text-lavender-950 leading-relaxed max-h-48 overflow-y-auto pr-1">
+            <p className="text-2xl font-semibold text-lavender-950 dark:text-darkText leading-relaxed max-h-48 overflow-y-auto pr-1">
               {card.front}
             </p>
           </div>
           
-          <div className="flex items-center gap-1.5 text-xs text-warmgray-400 font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-warmgray-400 dark:text-warmgray-500 font-medium">
             <RefreshCw size={12} className="animate-spin-slow" />
             <span>Haz clic o presiona Espacio para voltear</span>
           </div>
         </div>
 
         {/* CARA POSTERIOR (Respuesta) */}
-        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-lavender-50 rounded-3xl p-8 border border-lavender-200 shadow-sm flex flex-col justify-between items-center text-center">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-lavender-500 tracking-wider uppercase">
+        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-lavender-50 dark:bg-lavender-950/20 rounded-3xl p-8 border border-lavender-200 dark:border-lavender-950 shadow-sm flex flex-col justify-between items-center text-center">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-lavender-500 dark:text-lavender-400 tracking-wider uppercase">
             <CheckCircle size={14} />
             <span>Respuesta</span>
           </div>
           
           <div className="flex-1 flex items-center justify-center px-4 overflow-y-auto py-2">
-            <p className="text-xl font-medium text-lavender-950 leading-relaxed whitespace-pre-wrap">
+            <p className="text-xl font-medium text-lavender-950 dark:text-darkText leading-relaxed whitespace-pre-wrap">
               {card.back}
             </p>
           </div>
           
-          <div className="text-xs text-lavender-400 font-medium">
+          <div className="text-xs text-lavender-400 dark:text-lavender-500 font-medium">
             <span>Califica tu recuerdo abajo para continuar</span>
           </div>
         </div>

@@ -172,6 +172,38 @@ export function addCardToDeck(store, subjectId, deckId, cardData) {
   };
 }
 
+export function importCardsToDeck(store, subjectId, deckId, cardsData) {
+  const normalized = normalizeStore(store);
+  const now = nowIso();
+
+  const newCards = cardsData.map((cardData) => ({
+    id: cardData.id || createId('card'),
+    front: cardData.front || '',
+    back: cardData.back || '',
+    createdAt: cardData.createdAt || now,
+    algorithm: createDefaultAlgorithm(cardData.algorithm),
+  }));
+
+  return {
+    ...normalized,
+    subjects: normalized.subjects.map((subject) => {
+      if (subject.id !== subjectId) return subject;
+
+      return {
+        ...subject,
+        decks: subject.decks.map((deck) => {
+          if (deck.id !== deckId) return deck;
+
+          return {
+            ...deck,
+            cards: [...deck.cards, ...newCards],
+          };
+        }),
+      };
+    }),
+  };
+}
+
 export function updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlgorithm) {
   const normalized = normalizeStore(store);
 
