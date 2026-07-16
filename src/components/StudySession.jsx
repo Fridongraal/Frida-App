@@ -1,7 +1,102 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, CheckCircle2, AlertCircle, Sparkles, Smile, RefreshCw } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ChevronLeft,
+  CheckCircle2,
+  RefreshCw,
+  Sparkles,
+  RotateCcw,
+  Check,
+  ArrowRight,
+} from 'lucide-react';
 import Flashcard from './Flashcard';
 import { filterCards } from '../utils/fridaStore';
+import { applyStudyAction, getStudyActionPreview } from '../utils/fridaReview';
+
+function buildInitialSessionState(cards) {
+  return cards.reduce((acc, card) => {
+    acc[card.id] = {
+      awaitingGraduation: false,
+      workingAlgorithm: {
+        interval: Number.isFinite(card.algorithm?.interval) ? card.algorithm.interval : 1,
+        easeFactor: Number.isFinite(card.algorithm?.easeFactor) ? card.algorithm.easeFactor : 2.5,
+        repetitions: Number.isFinite(card.algorithm?.repetitions) ? card.algorithm.repetitions : 0,
+        nextReviewDate: card.algorithm?.nextReviewDate,
+      },
+    };
+    return acc;
+  }, {});
+}
+
+function getCardCategoryInfo(card) {
+  if (!card) return { label: '', classes: '' };
+
+  const reps = card.algorithm?.repetitions ?? 0;
+  const interval = card.algorithm?.interval ?? 1;
+
+  if (reps === 0 && interval >= 1) {
+    return {
+      label: 'Nueva',
+      classes: 'bg-lavender-100 dark:bg-lavender-950/40 text-lavender-700 dark:text-lavender-300 border border-lavender-200/50 dark:border-lavender-900/50',
+    };
+  }
+
+  if (interval < 1 || reps === 0) {
+    return {
+      label: 'En aprendizaje',
+      classes: 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 border border-rose-100 dark:border-rose-900/40',
+    };
+  }
+
+  return {
+    label: 'Repaso',
+    classes: 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-900/40',
+  };
+}
+
+function getToneClasses(tone, active) {
+  const base =
+    'group relative flex flex-col items-stretch justify-between gap-3 rounded-3xl border px-4 py-4 text-left shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2';
+
+  if (tone === 'again') {
+    const stateClasses = active
+      ? 'scale-95 bg-red-100/95 dark:bg-red-950/45 border-red-300 dark:border-red-800'
+      : 'bg-white hover:bg-red-50/50 dark:bg-dark-card border-red-200 dark:border-red-950/60 hover:-translate-y-0.5 hover:shadow-md';
+    return `${base} ${stateClasses} text-red-500 dark:text-red-400 focus-visible:ring-red-400/50`;
+  }
+
+  if (tone === 'easy') {
+    const stateClasses = active
+      ? 'scale-95 bg-frida-accent/90 dark:bg-frida-accent/35 border-frida-accent'
+      : 'bg-frida-accent hover:bg-frida-accent/90 dark:bg-transparent border-frida-accent/40 dark:border-frida-accent hover:-translate-y-0.5 hover:shadow-md';
+    return `${base} ${stateClasses} text-light-text dark:text-frida-accent focus-visible:ring-frida-accent/50`;
+  }
+
+  // default tone: good (Bien)
+  const stateClasses = active
+    ? 'scale-95 bg-frida-secondary/90 dark:bg-frida-primary/35 border-frida-primary'
+    : 'bg-frida-secondary hover:bg-frida-secondary/90 dark:bg-transparent border-frida-primary/40 dark:border-frida-primary hover:-translate-y-0.5 hover:shadow-md';
+  return `${base} ${stateClasses} text-light-text dark:text-frida-primary focus-visible:ring-frida-primary/50`;
+}
+
+function FeedbackButton({ tone, label, shortcut, icon: Icon, active, onClick }) {
+  return (
+    <button type="button" onClick={onClick} className={getToneClasses(tone, active)}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-white/70 dark:bg-white/5 border border-current/20">
+            <Icon size={18} />
+          </span>
+          <div>
+            <div className="text-sm font-extrabold tracking-tight">{label}</div>
+          </div>
+        </div>
+        <kbd className="px-2 py-1 text-[10px] font-bold rounded-lg bg-white/70 dark:bg-white/10 border border-current/15 shadow-sm">
+          {shortcut}
+        </kbd>
+      </div>
+    </button>
+  );
+}
 
 export default function StudySession({ deck, onReviewCard, onBack }) {
   const [dueCards, setDueCards] = useState([]);
@@ -9,163 +104,179 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [stats, setStats] = useState({ dificil: 0, bien: 0, facil: 0 });
-
-  // Estados de control para el flujo de estudio
   const [started, setStarted] = useState(false);
   const [hadCardsToStudy, setHadCardsToStudy] = useState(false);
   const [counts, setCounts] = useState({ newCount: 0, learningCount: 0, reviewCount: 0 });
+  const [sessionStates, setSessionStates] = useState({});
+  const [activeShortcut, setActiveShortcut] = useState(null);
 
+  const activeShortcutTimerRef = useRef(null);
   const lastDeckIdRef = useRef(null);
+  const flippedAtRef = useRef(0);
 
-  // Filtrar tarjetas pendientes al inicio
   useEffect(() => {
-    if (deck && deck.cards) {
-      if (lastDeckIdRef.current === deck.id) {
-        return; // Evitar reinicios si es el mismo mazo y solo cambiaron datos de tarjetas
+    return () => {
+      if (activeShortcutTimerRef.current) {
+        window.clearTimeout(activeShortcutTimerRef.current);
       }
-      lastDeckIdRef.current = deck.id;
+    };
+  }, []);
 
-      const { newCards, learningCards, reviewCards, total } = filterCards(deck, new Date());
-      
-      setCounts({
-        newCount: newCards.length,
-        learningCount: learningCards.length,
-        reviewCount: reviewCards.length
-      });
+  useEffect(() => {
+    if (!deck || !deck.cards) return;
 
-      // Cola de estudio: Aprendizaje -> Nuevas -> Repasar
-      const queue = [...learningCards, ...newCards, ...reviewCards];
-      setDueCards(queue);
-      setCurrentIndex(0);
-      setHadCardsToStudy(total > 0);
-      setSessionCompleted(false);
-      setStarted(false);
-      setStats({ dificil: 0, bien: 0, facil: 0 });
+    if (lastDeckIdRef.current === deck.id) {
+      return;
     }
+
+    lastDeckIdRef.current = deck.id;
+
+    const { newCards, learningCards, reviewCards, total } = filterCards(deck, new Date());
+    const queue = [...learningCards, ...newCards, ...reviewCards];
+
+    setCounts({
+      newCount: newCards.length,
+      learningCount: learningCards.length,
+      reviewCount: reviewCards.length,
+    });
+    setDueCards(queue);
+    setCurrentIndex(0);
+    setHadCardsToStudy(total > 0);
+    setSessionCompleted(false);
+    setStarted(false);
+    setStats({ dificil: 0, bien: 0, facil: 0 });
+    setSessionStates(buildInitialSessionState(queue));
   }, [deck]);
 
-  const currentCard = dueCards[currentIndex];
-
-  // Obtener información visual de la categoría de la tarjeta
-  const getCardCategoryInfo = (card) => {
-    if (!card) return { label: '', classes: '' };
-    const reps = card.algorithm?.repetitions ?? card.repetitions ?? 0;
-    const interval = card.algorithm?.interval ?? card.interval ?? 1;
-
-    if (reps === 0) {
-      return {
-        label: 'Nueva',
-        classes: 'bg-lavender-100 dark:bg-lavender-950/40 text-lavender-700 dark:text-lavender-300 border border-lavender-200/50 dark:border-lavender-900/50'
-      };
-    } else if (interval < 1) {
-      return {
-        label: 'En Aprendizaje',
-        classes: 'bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 border border-red-100 dark:border-red-950/30'
-      };
-    } else {
-      return {
-        label: 'Repaso',
-        classes: 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-150 dark:border-green-950/30'
-      };
+  useEffect(() => {
+    if (started && !sessionCompleted && dueCards.length > 0 && currentIndex >= dueCards.length) {
+      setSessionCompleted(true);
     }
-  };
+  }, [currentIndex, dueCards.length, sessionCompleted, started]);
 
-  // Calificar la tarjeta actual
-  const handleRate = useCallback((quality) => {
+  const currentCard = dueCards[currentIndex];
+  const currentSessionState = currentCard ? sessionStates[currentCard.id] : null;
+  const currentCardView = currentCard
+    ? {
+        ...currentCard,
+        algorithm: currentSessionState?.workingAlgorithm || currentCard.algorithm,
+      }
+    : null;
+
+  const pulseShortcut = useCallback((shortcut) => {
+    setActiveShortcut(shortcut);
+    if (activeShortcutTimerRef.current) {
+      window.clearTimeout(activeShortcutTimerRef.current);
+    }
+    activeShortcutTimerRef.current = window.setTimeout(() => {
+      setActiveShortcut(null);
+    }, 140);
+  }, []);
+
+  const queueCurrentCard = useCallback((mode) => {
     if (!currentCard) return;
 
-    // Registrar estadísticas
+    setDueCards((prevQueue) => {
+      const nextQueue = [...prevQueue];
+
+      if (mode === 'short') {
+        const insertIndex = Math.min(currentIndex + 3, nextQueue.length);
+        nextQueue.splice(insertIndex, 0, currentCard);
+      } else if (mode === 'end') {
+        nextQueue.push(currentCard);
+      }
+
+      return nextQueue;
+    });
+  }, [currentCard, currentIndex]);
+
+  const handleRate = useCallback((quality) => {
+    if (!currentCard || !deck) return;
+
+    const cardId = currentCard.id;
+    const sessionState = sessionStates[cardId] || {
+      awaitingGraduation: false,
+      workingAlgorithm: currentCard.algorithm,
+    };
+
+    const outcome = applyStudyAction(currentCardView || currentCard, quality, sessionState);
+
     setStats((prev) => {
       if (quality === 1) return { ...prev, dificil: prev.dificil + 1 };
       if (quality === 2) return { ...prev, bien: prev.bien + 1 };
       return { ...prev, facil: prev.facil + 1 };
     });
 
-    // Guardar revisión usando el hook / callback superior
-    onReviewCard(deck.id, currentCard.id, quality);
+    setSessionStates((prev) => ({
+      ...prev,
+      [cardId]: {
+        awaitingGraduation: outcome.awaitingGraduation,
+        workingAlgorithm: outcome.sessionAlgorithm,
+      },
+    }));
 
-    // Si presiona "Difícil" (1), vuelve al final de la cola de aprendizaje de esta sesión
-    if (quality === 1) {
-      setIsFlipped(false);
-      setTimeout(() => {
-        setDueCards((prevQueue) => {
-          const updatedQueue = [...prevQueue];
-          const currentCardToRepeat = { ...currentCard };
-
-          if (!currentCardToRepeat.algorithm) {
-            currentCardToRepeat.algorithm = {};
-          }
-          currentCardToRepeat.algorithm.interval = 0.5; // forzar intervalo de aprendizaje
-          
-          // Buscar el índice del final de las tarjetas de aprendizaje en la cola restante (después de currentIndex)
-          let insertIndex = currentIndex + 1;
-          for (let i = currentIndex + 1; i < updatedQueue.length; i++) {
-            const card = updatedQueue[i];
-            const interval = card.algorithm?.interval ?? card.interval ?? 1;
-            if (interval < 1) {
-              insertIndex = i + 1;
-            }
-          }
-
-          updatedQueue.splice(insertIndex, 0, currentCardToRepeat);
-          return updatedQueue;
-        });
-
-        // Avanzar el índice actual
-        setCurrentIndex((prev) => prev + 1);
-      }, 200);
-      return;
+    if (outcome.persistAlgorithm) {
+      onReviewCard(deck.id, cardId, outcome.persistAlgorithm);
     }
 
-    // Avanzar a la siguiente tarjeta o terminar para respuestas correctas (Bien o Fácil)
+    pulseShortcut(String(quality));
     setIsFlipped(false);
-    setTimeout(() => {
-      if (currentIndex + 1 < dueCards.length) {
-        setCurrentIndex((prev) => prev + 1);
-      } else {
-        setSessionCompleted(true);
-      }
-    }, 200);
-  }, [currentCard, currentIndex, dueCards, deck, onReviewCard]);
 
-  // Manejo de atajos de teclado
+    if (outcome.requeueMode !== 'none') {
+      queueCurrentCard(outcome.requeueMode);
+    }
+
+    window.setTimeout(() => {
+      setCurrentIndex((prev) => prev + 1);
+    }, 180);
+  }, [currentCard, currentCardView, deck, onReviewCard, pulseShortcut, queueCurrentCard, sessionStates]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignorar atajos si la sesión terminó o no ha comenzado
       if (sessionCompleted || !started) return;
 
-      if (e.code === 'Space') {
+      if (!isFlipped && e.code === 'Space') {
         e.preventDefault();
-        setIsFlipped((prev) => !prev);
-      } else if (isFlipped) {
-        if (e.key === '1') {
-          handleRate(1);
-        } else if (e.key === '2') {
-          handleRate(2);
-        } else if (e.key === '3') {
-          handleRate(3);
-        }
+        pulseShortcut('space');
+        setIsFlipped(true);
+        flippedAtRef.current = Date.now();
+        return;
+      }
+
+      if (!isFlipped) return;
+
+      if (e.key === '1') {
+        e.preventDefault();
+        pulseShortcut('1');
+        handleRate(1);
+      } else if (e.key === '2') {
+        e.preventDefault();
+        pulseShortcut('2');
+        handleRate(2);
+      } else if (e.key === '3') {
+        e.preventDefault();
+        pulseShortcut('3');
+        handleRate(3);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFlipped, handleRate, sessionCompleted, started]);
+  }, [handleRate, isFlipped, pulseShortcut, sessionCompleted, started]);
 
-  // 1. Pantalla "¡Al día!" (Zero State) si no hay tarjetas pendientes al inicio
   if (!hadCardsToStudy) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-warmgray-900 dark:text-darkText animate-fade-in">
-        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-455 rounded-full flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
+        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-lavender-950 dark:text-white mb-2">¡Todo al día!</h2>
+        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">¡Todo al día!</h2>
         <p className="text-warmgray-450 dark:text-warmgray-450 max-w-sm mb-8 text-sm">
           ¡Felicidades! Estás al día con este mazo. Vuelve más tarde o mañana para repasar.
         </p>
         <button
           onClick={onBack}
-          className="px-6 py-3 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-2xl transition-colors duration-200 shadow-sm"
+          className="px-6 py-3 bg-frida-primary hover:bg-frida-primary/90 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/25"
         >
           Volver al Inicio
         </button>
@@ -173,42 +284,32 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
     );
   }
 
-  // 2. Pantalla de pre-estudio con contadores
   if (!started && !sessionCompleted) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center h-[70vh] text-warmgray-900 dark:text-darkText animate-fade-in">
-        <h2 className="text-3xl font-extrabold text-lavender-950 dark:text-white mb-2">
-          {deck.name}
-        </h2>
-        <p className="text-sm text-warmgray-450 dark:text-warmgray-400 mb-8 max-w-md">
+      <div className="flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
+        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">{deck.name}</h2>
+        <p className="text-sm text-warmgray-455 dark:text-warmgray-450 mb-8 max-w-md">
           Estás por comenzar tu sesión de estudio. Revisa el estado de tus tarjetas a continuación:
         </p>
 
-        {/* Píldoras de contadores */}
         <div className="grid grid-cols-3 gap-4 w-full mb-10">
-          <div className="flex flex-col items-center justify-center p-4 bg-lavender-100/50 dark:bg-lavender-950/20 border border-lavender-200/50 dark:border-lavender-900/40 rounded-2xl">
-            <span className="text-2xl font-bold text-lavender-750 dark:text-lavender-300">
-              {counts.newCount}
-            </span>
-            <span className="text-xs font-semibold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mt-1">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-frida-primary/20 rounded-2xl">
+            <span className="text-2xl font-bold text-light-text dark:text-frida-secondary">{counts.newCount}</span>
+            <span className="text-[10px] font-bold text-light-text/75 dark:text-frida-secondary/80 uppercase tracking-wider mt-1">
               Nuevas
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center p-4 bg-red-50 dark:bg-red-950/10 border border-red-100 dark:border-red-950/30 rounded-2xl">
-            <span className="text-2xl font-bold text-red-650 dark:text-red-400">
-              {counts.learningCount}
-            </span>
-            <span className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wider mt-1">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-accent/80 dark:bg-frida-accent/20 border border-frida-accent/30 dark:border-frida-accent/20 rounded-2xl">
+            <span className="text-2xl font-bold text-sky-900 dark:text-frida-accent">{counts.learningCount}</span>
+            <span className="text-[10px] font-bold text-sky-950/75 dark:text-frida-accent/80 uppercase tracking-wider mt-1">
               Aprendizaje
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center p-4 bg-green-50 dark:bg-green-950/10 border border-green-150 dark:border-green-950/30 rounded-2xl">
-            <span className="text-2xl font-bold text-green-700 dark:text-green-400">
-              {counts.reviewCount}
-            </span>
-            <span className="text-xs font-semibold text-green-800 dark:text-green-400 uppercase tracking-wider mt-1">
+          <div className="flex flex-col items-center justify-center p-4 bg-frida-success/80 dark:bg-frida-success/20 border border-frida-success/30 dark:border-frida-success/25 rounded-2xl">
+            <span className="text-2xl font-bold text-green-900 dark:text-green-300">{counts.reviewCount}</span>
+            <span className="text-[10px] font-bold text-green-950/75 dark:text-green-400 uppercase tracking-wider mt-1">
               Repasar
             </span>
           </div>
@@ -217,52 +318,51 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         <div className="flex items-center gap-3 w-full">
           <button
             onClick={onBack}
-            className="flex-1 py-3.5 bg-white dark:bg-darkCard hover:bg-warmgray-50 dark:hover:bg-lavender-950/20 text-warmgray-450 dark:text-warmgray-400 border border-lavender-100 dark:border-lavender-950 font-bold rounded-2xl transition-colors duration-200 text-sm"
+            className="flex-1 py-3.5 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 text-warmgray-455 dark:text-warmgray-400 border border-frida-primary/20 dark:border-lavender-950/60 font-bold rounded-2xl transition-colors duration-200 text-sm"
           >
             Volver
           </button>
           <button
             onClick={() => setStarted(true)}
-            className="flex-2 py-3.5 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-2xl transition-colors duration-200 shadow-sm shadow-lavender-100 dark:shadow-none text-sm w-2/3"
+            className="w-2/3 py-3.5 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/20 text-sm"
           >
-            Comenzar Sesión
+            Comenzar sesión
           </button>
         </div>
       </div>
     );
   }
 
-  // 3. Pantalla de sesión completada
   if (sessionCompleted) {
     const totalEstudiadas = stats.dificil + stats.bien + stats.facil;
+
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] animate-fade-in text-warmgray-900 dark:text-darkText">
-        <div className="w-20 h-20 bg-lavender-50 dark:bg-lavender-950/40 text-lavender-500 dark:text-lavender-450 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
-          <Sparkles size={40} className="text-lavender-500" />
+      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] animate-fade-in text-light-text dark:text-dark-text">
+        <div className="w-20 h-20 bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+          <Sparkles size={40} className="text-frida-primary" />
         </div>
-        <h2 className="text-3xl font-extrabold text-lavender-950 dark:text-white mb-2">¡Buen trabajo!</h2>
+        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">¡Buen trabajo!</h2>
         <p className="text-warmgray-450 dark:text-warmgray-400 mb-6 text-sm">
           Has completado todas las tarjetas pendientes de este mazo por hoy.
         </p>
 
-        {/* Panel de estadísticas simplificado */}
         {totalEstudiadas > 0 && (
-          <div className="w-full bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-5 mb-8 shadow-sm transition-colors duration-300">
-            <h3 className="text-sm font-semibold text-lavender-800 dark:text-lavender-400 mb-4 uppercase tracking-wider">
-              Resumen de Respuestas
+          <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 mb-8 shadow-sm transition-colors duration-300">
+            <h3 className="text-sm font-semibold text-frida-primary dark:text-frida-secondary mb-4 uppercase tracking-wider">
+              Resumen de respuestas
             </h3>
             <div className="grid grid-cols-3 gap-2">
-              <div className="p-3 bg-red-50/50 dark:bg-red-950/20 rounded-2xl">
+              <div className="p-3 bg-red-50/60 dark:bg-red-950/20 rounded-2xl">
                 <span className="block text-xl font-bold text-red-500 dark:text-red-400">{stats.dificil}</span>
-                <span className="text-[10px] font-semibold text-red-450 dark:text-red-500 uppercase">Difícil</span>
+                <span className="text-[10px] font-semibold text-red-400 dark:text-red-500 uppercase">Otra vez</span>
               </div>
-              <div className="p-3 bg-lavender-50/50 dark:bg-lavender-950/20 rounded-2xl">
-                <span className="block text-xl font-bold text-lavender-500 dark:text-lavender-400">{stats.bien}</span>
-                <span className="text-[10px] font-semibold text-lavender-400 dark:text-lavender-500 uppercase">Bien</span>
+              <div className="p-3 bg-frida-secondary/20 dark:bg-frida-primary/10 rounded-2xl">
+                <span className="block text-xl font-bold text-frida-primary dark:text-frida-secondary">{stats.bien}</span>
+                <span className="text-[10px] font-semibold text-frida-primary dark:text-frida-secondary uppercase">Bien</span>
               </div>
-              <div className="p-3 bg-green-50/50 dark:bg-green-950/20 rounded-2xl">
-                <span className="block text-xl font-bold text-green-500 dark:text-green-400">{stats.facil}</span>
-                <span className="text-[10px] font-semibold text-green-400 dark:text-green-550 uppercase">Fácil</span>
+              <div className="p-3 bg-frida-accent/20 dark:bg-frida-accent/10 rounded-2xl">
+                <span className="block text-xl font-bold text-sky-600 dark:text-frida-accent">{stats.facil}</span>
+                <span className="text-[10px] font-semibold text-sky-650 dark:text-sky-350 uppercase">Fácil</span>
               </div>
             </div>
           </div>
@@ -270,7 +370,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
 
         <button
           onClick={onBack}
-          className="w-full py-4 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-2xl transition-all duration-200 shadow-sm hover:shadow"
+          className="w-full py-4 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-2xl transition-all duration-200 shadow-sm shadow-frida-secondary/25 hover:shadow"
         >
           Volver al menú principal
         </button>
@@ -278,108 +378,121 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
     );
   }
 
-  // Progreso
-  const progressPercent = ((currentIndex) / dueCards.length) * 100;
+  const progressPercent = dueCards.length > 0 ? (currentIndex / dueCards.length) * 100 : 0;
+  const actionPreview = currentCardView ? getStudyActionPreview(currentCardView, 2, currentSessionState || {}) : { label: '<10m' };
+  const easyPreview = currentCardView ? getStudyActionPreview(currentCardView, 3, currentSessionState || {}) : { label: '5d' };
+  const isShortLearning = Boolean(currentSessionState?.awaitingGraduation || currentCardView?.algorithm?.repetitions === 0);
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-2 justify-between text-warmgray-900 dark:text-darkText">
-      {/* Cabecera / Navegación interna */}
+    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-2 justify-between text-light-text dark:text-dark-text">
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-warmgray-455 hover:text-lavender-900 dark:text-warmgray-400 dark:hover:text-lavender-350 transition-colors text-sm font-medium"
+          className="flex items-center gap-1.5 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-400 dark:hover:text-frida-secondary transition-colors text-sm font-medium"
         >
           <ChevronLeft size={18} />
-          <span>Salir del Estudio</span>
+          <span>Salir del estudio</span>
         </button>
-        
+
         <div className="flex items-center gap-2">
-          {currentCard && (
-            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getCardCategoryInfo(currentCard).classes}`}>
-              {getCardCategoryInfo(currentCard).label}
+          {currentCardView && (
+            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getCardCategoryInfo(currentCardView).classes}`}>
+              {getCardCategoryInfo(currentCardView).label}
             </span>
           )}
-          <span className="text-xs font-bold bg-lavender-100 dark:bg-lavender-950/50 text-lavender-800 dark:text-lavender-300 px-3 py-1 rounded-full border border-lavender-200/20 dark:border-lavender-900/30">
+          <span className="text-xs font-bold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-frida-secondary px-3 py-1 rounded-full border border-frida-primary/20 dark:border-lavender-950/40">
             Mazo: {deck.name}
           </span>
         </div>
       </div>
 
-      {/* Barra de Progreso */}
       <div className="w-full mb-6">
-        <div className="flex justify-between text-xs text-warmgray-450 dark:text-warmgray-400 mb-1.5 font-semibold">
+        <div className="flex justify-between text-xs text-warmgray-455 dark:text-warmgray-455 mb-1.5 font-semibold">
           <span>Progreso de hoy</span>
-          <span>{currentIndex + 1} de {dueCards.length} tarjetas</span>
+          <span>
+            {Math.min(currentIndex + 1, dueCards.length)} de {dueCards.length} tarjetas
+          </span>
         </div>
-        <div className="w-full h-2 bg-lavender-50 dark:bg-lavender-950/30 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-frida-secondary/15 dark:bg-frida-primary/5 rounded-full overflow-hidden">
           <div
-            className="h-full bg-lavender-400 transition-all duration-300 rounded-full"
+            className="h-full bg-frida-primary transition-all duration-300 rounded-full"
             style={{ width: `${progressPercent || 5}%` }}
           />
         </div>
       </div>
 
-      {/* Tarjeta de Memoria */}
       <div className="flex-1 flex items-center justify-center my-4">
-        {currentCard && (
+         {currentCardView && (
           <Flashcard
-            card={currentCard}
+            card={currentCardView}
             isFlipped={isFlipped}
-            onFlip={() => setIsFlipped((prev) => !prev)}
+            onFlip={() => {
+              pulseShortcut('space');
+              setIsFlipped((prev) => {
+                const next = !prev;
+                if (next) {
+                  flippedAtRef.current = Date.now();
+                }
+                return next;
+              });
+            }}
           />
         )}
       </div>
 
-      {/* Controles de Calificación / Volteo */}
-      <div className="mt-4 min-h-[90px] flex flex-col justify-center">
+      <div className="mt-4 min-h-[120px] flex flex-col justify-center">
         {!isFlipped ? (
           <button
-            onClick={() => setIsFlipped(true)}
-            className="w-full max-w-md mx-auto py-4 bg-lavender-500 hover:bg-lavender-600 active:scale-[0.98] text-white font-bold rounded-2xl shadow transition-all duration-200 flex items-center justify-center gap-2"
+            onClick={() => {
+              pulseShortcut('space');
+              setIsFlipped(true);
+              flippedAtRef.current = Date.now();
+            }}
+            className="w-full max-w-md mx-auto py-4 bg-frida-primary hover:bg-frida-primary/95 active:scale-[0.98] text-light-text font-extrabold rounded-2xl shadow transition-all duration-200 flex items-center justify-center gap-2 shadow-frida-secondary/25"
           >
-            <RefreshCw size={18} className="animate-spin-slow" />
-            <span>Mostrar Respuesta</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 ml-2 text-[10px] font-bold bg-lavender-600 dark:bg-lavender-700 text-lavender-100 rounded">
+            <RefreshCw size={18} className="animate-spin-slow text-light-text" />
+            <span>Mostrar respuesta</span>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 ml-2 text-[10px] font-bold bg-frida-primary/20 dark:bg-frida-primary/10 text-light-text dark:text-dark-text rounded">
               Espacio
             </kbd>
           </button>
         ) : (
-          <div className="grid grid-cols-3 gap-3 w-full max-w-xl mx-auto animate-slide-up">
-            {/* DIFICIL */}
-            <button
-              onClick={() => handleRate(1)}
-              className="flex flex-col items-center justify-center p-3 bg-red-50 dark:bg-red-950/10 hover:bg-red-100/80 dark:hover:bg-red-950/30 border border-red-100 dark:border-red-950/50 rounded-2xl transition-all group"
-            >
-              <span className="text-xs font-bold text-red-500 dark:text-red-400 group-hover:scale-105 transition-transform flex items-center gap-1">
-                Difícil
-                <kbd className="px-1 text-[9px] bg-red-200 dark:bg-red-900/60 text-red-700 dark:text-red-300 rounded font-mono">1</kbd>
-              </span>
-              <span className="text-[10px] text-red-400 dark:text-red-500 mt-1 hidden sm:block">Repetir pronto</span>
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl mx-auto animate-slide-up">
+            <FeedbackButton
+              tone="again"
+              label="Otra vez (<1m)"
+              shortcut="1"
+              icon={RotateCcw}
+              active={activeShortcut === '1'}
+              onClick={() => {
+                pulseShortcut('1');
+                handleRate(1);
+              }}
+            />
 
-            {/* BIEN */}
-            <button
-              onClick={() => handleRate(2)}
-              className="flex flex-col items-center justify-center p-3 bg-lavender-50 dark:bg-lavender-950/10 hover:bg-lavender-100/80 dark:hover:bg-lavender-950/30 border border-lavender-100 dark:border-lavender-950/50 rounded-2xl transition-all group"
-            >
-              <span className="text-xs font-bold text-lavender-600 dark:text-lavender-450 group-hover:scale-105 transition-transform flex items-center gap-1">
-                Bien
-                <kbd className="px-1 text-[9px] bg-lavender-200 dark:bg-lavender-900/60 text-lavender-750 dark:text-lavender-300 rounded font-mono">2</kbd>
-              </span>
-              <span className="text-[10px] text-lavender-450 dark:text-lavender-555 mt-1 hidden sm:block">Intervalo medio</span>
-            </button>
+            <FeedbackButton
+              tone="good"
+              label={`Bien (${actionPreview.label})`}
+              shortcut="2"
+              icon={Check}
+              active={activeShortcut === '2'}
+              onClick={() => {
+                pulseShortcut('2');
+                handleRate(2);
+              }}
+            />
 
-            {/* FACIL */}
-            <button
-              onClick={() => handleRate(3)}
-              className="flex flex-col items-center justify-center p-3 bg-green-50 dark:bg-green-950/10 hover:bg-green-100/80 dark:hover:bg-green-950/30 border border-green-100 dark:border-green-950/50 rounded-2xl transition-all group"
-            >
-              <span className="text-xs font-bold text-green-600 dark:text-green-400 group-hover:scale-105 transition-transform flex items-center gap-1">
-                Fácil
-                <kbd className="px-1 text-[9px] bg-green-200 dark:bg-green-900/60 text-green-700 dark:text-green-300 rounded font-mono">3</kbd>
-              </span>
-              <span className="text-[10px] text-green-400 dark:text-green-555 mt-1 hidden sm:block">Intervalo largo</span>
-            </button>
+            <FeedbackButton
+              tone="easy"
+              label={`Fácil (${easyPreview.label})`}
+              shortcut="3"
+              icon={ArrowRight}
+              active={activeShortcut === '3'}
+              onClick={() => {
+                pulseShortcut('3');
+                handleRate(3);
+              }}
+            />
           </div>
         )}
       </div>

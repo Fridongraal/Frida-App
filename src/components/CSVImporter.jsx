@@ -133,24 +133,24 @@ export default function CSVImporter({
   const currentDeckName = decks.find(d => d.id === selectedDeckId)?.name || 'Mazo seleccionado';
 
   return (
-    <div className="fixed inset-0 bg-lavender-950/20 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in text-warmgray-900 dark:text-darkText">
-      <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 w-full max-w-2xl shadow-2xl relative animate-slide-up flex flex-col max-h-[90vh] overflow-hidden transition-colors duration-300">
+    <div className="fixed inset-0 bg-light-bg/40 dark:bg-black/65 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in text-light-text dark:text-dark-text">
+      <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 w-full max-w-2xl shadow-2xl relative animate-slide-up flex flex-col max-h-[90vh] overflow-hidden transition-colors duration-300">
         
         {/* Cabecera del modal */}
-        <div className="flex items-start justify-between border-b border-lavender-50 dark:border-lavender-950 pb-4 mb-4">
+        <div className="flex items-start justify-between border-b border-frida-primary/10 dark:border-lavender-950/40 pb-4 mb-4">
           <div>
-            <h3 className="text-xl font-bold text-lavender-950 dark:text-white flex items-center gap-2">
-              <UploadCloud size={22} className="text-lavender-500" />
+            <h3 className="text-xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+              <UploadCloud size={22} className="text-frida-primary" />
               <span>Importar Tarjetas desde CSV</span>
             </h3>
-            <p className="text-xs text-warmgray-450 mt-1">
+            <p className="text-xs text-warmgray-455 mt-1">
               Agrega múltiples tarjetas de forma masiva asignando columnas de un archivo CSV.
             </p>
           </div>
           <button
             onClick={onClose}
             disabled={importing}
-            className="p-2 text-warmgray-400 dark:text-warmgray-500 hover:text-lavender-950 dark:hover:text-white hover:bg-lavender-50 dark:hover:bg-lavender-950/30 rounded-xl transition-all"
+            className="p-2 text-warmgray-450 dark:text-warmgray-500 hover:text-light-text dark:hover:text-white hover:bg-frida-secondary/20 dark:hover:bg-frida-primary/10 rounded-xl transition-all"
           >
             <X size={18} />
           </button>
@@ -163,15 +163,15 @@ export default function CSVImporter({
           {step === 1 && (
             <div className="flex flex-col gap-4">
               {/* Selectores de Destino */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-lavender-50/30 dark:bg-lavender-950/10 p-4 border border-lavender-100 dark:border-lavender-950 rounded-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-frida-secondary/10 dark:bg-frida-primary/5 p-4 border border-frida-primary/15 dark:border-lavender-950/35 rounded-2xl">
                 <div>
-                  <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1.5">
                     Materia Destino
                   </label>
                   <select
                     value={selectedSubjectId}
                     onChange={(e) => setSelectedSubjectId(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-darkCard border border-lavender-100 dark:border-lavender-950 focus:border-lavender-450 focus:outline-none text-sm text-lavender-950 dark:text-white transition-all"
+                    className="w-full px-3 py-2.5 rounded-xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/50 focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all"
                   >
                     {subjects.map(subject => (
                       <option key={subject.id} value={subject.id}>{subject.name}</option>
@@ -179,14 +179,14 @@ export default function CSVImporter({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1.5">
                     Mazo Destino
                   </label>
                   <select
                     value={selectedDeckId}
                     onChange={(e) => setSelectedDeckId(e.target.value)}
                     disabled={filteredDecks.length === 0}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-darkCard border border-lavender-100 dark:border-lavender-950 focus:border-lavender-450 focus:outline-none text-sm text-lavender-950 dark:text-white transition-all disabled:opacity-50"
+                    className="w-full px-3 py-2.5 rounded-xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/50 focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text transition-all disabled:opacity-50"
                   >
                     {filteredDecks.map(deck => (
                       <option key={deck.id} value={deck.id}>{deck.name}</option>
@@ -205,8 +205,8 @@ export default function CSVImporter({
                 onDrop={handleDrop}
                 className={`flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-3xl text-center cursor-pointer transition-all duration-300 ${
                   isDragging
-                    ? 'border-lavender-500 bg-lavender-50/50 dark:bg-lavender-950/20 scale-[1.01]'
-                    : 'border-lavender-200 dark:border-lavender-900 hover:border-lavender-400 hover:bg-lavender-50/30 dark:hover:bg-lavender-950/10'
+                    ? 'border-frida-primary bg-frida-secondary/20 scale-[1.01]'
+                    : 'border-frida-primary/20 dark:border-lavender-950/30 hover:border-frida-primary/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5'
                 }`}
                 onClick={() => document.getElementById('csv-file-input').click()}
               >
@@ -217,13 +217,13 @@ export default function CSVImporter({
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <div className="w-14 h-14 bg-lavender-50 dark:bg-lavender-950/40 rounded-2xl flex items-center justify-center text-lavender-500 dark:text-lavender-400 mb-4">
+                <div className="w-14 h-14 bg-frida-secondary/20 dark:bg-frida-primary/10 rounded-2xl flex items-center justify-center text-frida-primary mb-4">
                   <UploadCloud size={30} />
                 </div>
-                <h4 className="text-base font-bold text-lavender-950 dark:text-white">
+                <h4 className="text-base font-bold text-light-text dark:text-dark-text">
                   Arrastra tu archivo CSV aquí
                 </h4>
-                <p className="text-xs text-warmgray-450 mt-1.5 max-w-xs">
+                <p className="text-xs text-warmgray-455 mt-1.5 max-w-xs">
                   O haz clic para explorar tus archivos locales. Asegúrate de que use coma, punto y coma o tabulador como delimitador.
                 </p>
               </div>
@@ -240,15 +240,15 @@ export default function CSVImporter({
           {/* STEP 2: MAPEO DE COLUMNAS Y VISTA PREVIA */}
           {step === 2 && (
             <div className="flex flex-col gap-5 animate-fade-in">
-              <div className="flex items-center justify-between bg-lavender-50/30 dark:bg-lavender-950/10 p-3.5 border border-lavender-100 dark:border-lavender-950 rounded-xl">
+              <div className="flex items-center justify-between bg-frida-secondary/15 dark:bg-frida-primary/5 p-3.5 border border-frida-primary/20 dark:border-lavender-950/30 rounded-xl">
                 <div className="flex items-center gap-2">
-                  <FileText size={18} className="text-lavender-500" />
+                  <FileText size={18} className="text-frida-primary" />
                   <span className="text-xs font-bold truncate max-w-[200px]" title={file?.name}>{file?.name}</span>
-                  <span className="text-[10px] text-warmgray-400">({(file?.size / 1024).toFixed(1)} KB)</span>
+                  <span className="text-[10px] text-warmgray-450">({(file?.size / 1024).toFixed(1)} KB)</span>
                 </div>
                 <button
                   onClick={() => { setStep(1); setFile(null); setRawRows([]); }}
-                  className="text-xs text-lavender-650 hover:underline dark:text-lavender-400 font-semibold"
+                  className="text-xs text-frida-primary hover:underline dark:text-frida-secondary font-semibold"
                 >
                   Cambiar archivo
                 </button>
@@ -262,22 +262,22 @@ export default function CSVImporter({
                     id="csv-has-headers"
                     checked={hasHeaders}
                     onChange={(e) => setHasHeaders(e.target.checked)}
-                    className="w-4 h-4 text-lavender-500 focus:ring-lavender-450 border-lavender-300 rounded"
+                    className="w-4 h-4 text-frida-primary focus:ring-frida-primary border-frida-primary/20 rounded"
                   />
-                  <label htmlFor="csv-has-headers" className="text-xs font-semibold text-lavender-900 dark:text-lavender-350 cursor-pointer">
+                  <label htmlFor="csv-has-headers" className="text-xs font-semibold text-light-text dark:text-dark-text/80 cursor-pointer">
                     La primera fila contiene cabeceras de columnas
                   </label>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1.5">
                       Frente (Pregunta / Concepto)
                     </label>
                     <select
                       value={frontColIndex}
                       onChange={(e) => setFrontColIndex(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-darkCard border border-lavender-100 dark:border-lavender-950 focus:border-lavender-450 focus:outline-none text-sm text-lavender-950 dark:text-white"
+                      className="w-full px-3 py-2.5 rounded-xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/50 focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text"
                     >
                       {headers.map((header, idx) => (
                         <option key={idx} value={idx}>{header}</option>
@@ -285,13 +285,13 @@ export default function CSVImporter({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1.5">
                       Reverso (Respuesta / Definición)
                     </label>
                     <select
                       value={backColIndex}
                       onChange={(e) => setBackColIndex(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-darkCard border border-lavender-100 dark:border-lavender-950 focus:border-lavender-450 focus:outline-none text-sm text-lavender-950 dark:text-white"
+                      className="w-full px-3 py-2.5 rounded-xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/50 focus:border-frida-primary focus:outline-none text-sm text-light-text dark:text-dark-text"
                     >
                       {headers.map((header, idx) => (
                         <option key={idx} value={idx}>{header}</option>
@@ -303,7 +303,7 @@ export default function CSVImporter({
 
               {/* Vista Previa de Tarjetas */}
               <div className="flex flex-col gap-2.5">
-                <span className="text-xs font-bold text-lavender-850 dark:text-lavender-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider">
                   Vista Previa de Tarjetas (Primeras 3 filas válidas)
                 </span>
                 
@@ -316,19 +316,19 @@ export default function CSVImporter({
                     {mappedCards.slice(0, 3).map((card, idx) => (
                       <div
                         key={idx}
-                        className="bg-warmgray-50 dark:bg-lavender-950/15 border border-lavender-100 dark:border-lavender-950 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-xs"
+                        className="bg-light-bg dark:bg-dark-bg/30 border border-frida-primary/15 dark:border-lavender-950/35 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-xs"
                       >
                         <div className="flex-1">
-                          <span className="font-bold text-lavender-500 uppercase tracking-wider text-[10px] block mb-1">
+                          <span className="font-bold text-frida-primary uppercase tracking-wider text-[10px] block mb-1">
                             Anverso (Frente)
                           </span>
-                          <p className="font-semibold text-lavender-950 dark:text-white line-clamp-3">
+                          <p className="font-semibold text-light-text dark:text-dark-text line-clamp-3">
                             {card.front}
                           </p>
                         </div>
-                        <div className="w-px self-stretch bg-lavender-100 dark:bg-lavender-950 hidden sm:block"></div>
+                        <div className="w-px self-stretch bg-frida-primary/15 dark:bg-lavender-950/40 hidden sm:block"></div>
                         <div className="flex-1">
-                          <span className="font-bold text-lavender-500 uppercase tracking-wider text-[10px] block mb-1">
+                          <span className="font-bold text-frida-primary uppercase tracking-wider text-[10px] block mb-1">
                             Reverso
                           </span>
                           <p className="text-warmgray-455 dark:text-warmgray-400 line-clamp-3">
@@ -358,7 +358,7 @@ export default function CSVImporter({
                 <Check size={32} strokeWidth={3} />
               </div>
               <div>
-                <h3 className="text-2xl font-extrabold text-lavender-950 dark:text-white">
+                <h3 className="text-2xl font-extrabold text-light-text dark:text-dark-text">
                   ¡Importación Completada!
                 </h3>
                 <p className="text-sm text-warmgray-450 mt-1 max-w-sm mx-auto">
@@ -367,7 +367,7 @@ export default function CSVImporter({
               </div>
               <button
                 onClick={onClose}
-                className="mt-2 px-6 py-3 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-2xl transition-colors shadow-sm text-sm"
+                className="mt-2 px-6 py-3 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-2xl transition-colors shadow-sm shadow-frida-secondary/25 text-sm"
               >
                 Listo
               </button>
@@ -378,11 +378,11 @@ export default function CSVImporter({
 
         {/* Footer del Modal (Botones de acción) */}
         {step < 3 && (
-          <div className="flex items-center justify-end gap-3 border-t border-lavender-50 dark:border-lavender-950 pt-4 mt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-frida-primary/10 dark:border-lavender-950/45 pt-4 mt-4">
             <button
               onClick={onClose}
               disabled={importing}
-              className="px-4 py-2.5 text-sm font-semibold text-warmgray-400 dark:text-warmgray-500 hover:bg-warmgray-100 dark:hover:bg-lavender-950/20 rounded-xl transition-colors disabled:opacity-50"
+              className="px-4 py-2.5 text-sm font-semibold text-warmgray-455 dark:text-warmgray-500 hover:bg-warmgray-100 dark:hover:bg-lavender-950/20 rounded-xl transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -391,7 +391,7 @@ export default function CSVImporter({
               <button
                 onClick={executeImport}
                 disabled={importing || mappedCards.length === 0}
-                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-lavender-500 hover:bg-lavender-600 disabled:bg-warmgray-150 disabled:text-warmgray-400 dark:disabled:bg-lavender-950/20 dark:disabled:text-warmgray-600 text-white font-bold rounded-xl text-sm transition-all shadow-sm active:scale-[0.98]"
+                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-frida-primary hover:bg-frida-primary/95 disabled:bg-warmgray-100 disabled:text-warmgray-400 dark:disabled:bg-lavender-950/15 dark:disabled:text-warmgray-600 text-light-text font-extrabold rounded-xl text-sm transition-all shadow-sm active:scale-[0.98] shadow-frida-secondary/20"
               >
                 {importing ? (
                   <>

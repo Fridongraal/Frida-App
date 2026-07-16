@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { calculateSM2 } from '../utils/sm2';
+import { applyStudyAction } from '../utils/fridaReview';
 import {
   addCardToDeck,
   addDeckToSubject,
@@ -96,19 +96,18 @@ export function useFridaData() {
     const card = deck?.cards.find((candidate) => candidate.id === cardId);
     if (!deck || !card) return;
 
-    const result = calculateSM2(
-      quality,
-      card.algorithm.interval,
-      card.algorithm.easeFactor,
-      card.algorithm.repetitions
-    );
+    const persistAlgorithm = (typeof quality === 'object' && quality !== null)
+      ? (quality.persistAlgorithm ? quality.persistAlgorithm : (quality.nextReviewDate ? quality : null))
+      : applyStudyAction(card, quality, {}).persistAlgorithm;
+
+    if (!persistAlgorithm) return;
 
     persistStore(
       updateCardAlgorithm(store, subject.id, deckId, cardId, {
-        interval: result.interval,
-        easeFactor: result.easeFactor,
-        repetitions: result.repetitions,
-        nextReviewDate: result.nextReviewDate,
+        interval: persistAlgorithm.interval,
+        easeFactor: persistAlgorithm.easeFactor,
+        repetitions: persistAlgorithm.repetitions,
+        nextReviewDate: persistAlgorithm.nextReviewDate,
       })
     );
   };

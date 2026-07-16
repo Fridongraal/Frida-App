@@ -35,24 +35,24 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
   };
 
   return (
-    <div className="flex flex-col h-full max-w-3xl mx-auto px-6 py-8 overflow-y-auto animate-fade-in text-warmgray-900 dark:text-darkText">
+    <div className="flex flex-col h-full max-w-3xl mx-auto px-6 py-8 overflow-y-auto animate-fade-in text-light-text dark:text-dark-text">
       {/* Botón de regreso */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-warmgray-400 hover:text-lavender-900 dark:hover:text-lavender-300 transition-colors text-sm font-medium mb-6 self-start"
+        className="flex items-center gap-1.5 text-warmgray-450 hover:text-frida-primary dark:hover:text-frida-secondary transition-colors text-sm font-medium mb-6 self-start"
       >
         <ArrowLeft size={18} />
         <span>Volver al Inicio</span>
       </button>
 
       {/* Título de la pantalla */}
-      <div className="flex items-center gap-3 mb-8 border-b border-lavender-100 dark:border-lavender-900 pb-4">
-        <div className="w-12 h-12 bg-lavender-100 dark:bg-lavender-950 rounded-2xl flex items-center justify-center text-lavender-500 dark:text-lavender-400">
+      <div className="flex items-center gap-3 mb-8 border-b border-frida-primary/15 dark:border-lavender-950/40 pb-4">
+        <div className="w-12 h-12 bg-frida-secondary/15 dark:bg-frida-primary/10 rounded-2xl flex items-center justify-center text-frida-primary">
           <Settings size={24} />
         </div>
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Configuración</h1>
-          <p className="text-sm text-warmgray-400 mt-0.5">
+          <p className="text-sm text-warmgray-455 mt-0.5">
             Personaliza el tema visual y gestiona tus datos de estudio.
           </p>
         </div>
@@ -60,11 +60,11 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
 
       <div className="flex flex-col gap-6">
         {/* SECCIÓN TEMA */}
-        <section className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 shadow-sm transition-all duration-300">
-          <h2 className="text-lg font-bold text-lavender-950 dark:text-white mb-1 flex items-center gap-2">
+        <section className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 shadow-sm transition-all duration-300">
+          <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-1 flex items-center gap-2">
             <span>Tema Visual</span>
           </h2>
-          <p className="text-xs text-warmgray-400 mb-6">
+          <p className="text-xs text-warmgray-450 mb-6">
             Elige el aspecto visual que mejor se adapte a tu entorno de estudio.
           </p>
 
@@ -74,18 +74,18 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
               onClick={() => setTheme('light')}
               className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
                 theme === 'light'
-                  ? 'border-lavender-500 bg-lavender-50/50 text-lavender-950 dark:text-white shadow-sm'
-                  : 'border-lavender-100 dark:border-lavender-950 hover:bg-warmgray-50 dark:hover:bg-lavender-950/20 text-warmgray-400'
+                  ? 'border-frida-primary bg-frida-secondary/20 text-light-text shadow-sm font-bold'
+                  : 'border-frida-primary/15 dark:border-lavender-950/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5 text-warmgray-450'
               }`}
             >
               {theme === 'light' && (
-                <span className="absolute top-3 right-3 bg-lavender-500 text-white rounded-full p-0.5">
+                <span className="absolute top-3 right-3 bg-frida-primary text-light-text rounded-full p-0.5">
                   <Check size={12} strokeWidth={3} />
                 </span>
               )}
-              <Sun size={28} className={theme === 'light' ? 'text-lavender-500' : 'text-warmgray-400'} />
+              <Sun size={28} className={theme === 'light' ? 'text-frida-primary' : 'text-warmgray-450'} />
               <span className="text-sm font-bold mt-3">Modo Claro</span>
-              <span className="text-[10px] text-warmgray-400 mt-1">Luminoso y limpio</span>
+              <span className="text-[10px] text-warmgray-450 mt-1">Luminoso y limpio</span>
             </button>
 
             {/* Opción Oscuro */}
@@ -93,44 +93,44 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
               onClick={() => setTheme('dark')}
               className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
                 theme === 'dark'
-                  ? 'border-lavender-500 bg-[#221c30]/50 text-white shadow-sm'
-                  : 'border-lavender-100 dark:border-lavender-950 hover:bg-warmgray-50 dark:hover:bg-lavender-950/20 text-warmgray-400'
+                  ? 'border-frida-primary bg-frida-primary/20 text-dark-text shadow-sm font-bold'
+                  : 'border-frida-primary/15 dark:border-lavender-950/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5 text-warmgray-450'
               }`}
             >
               {theme === 'dark' && (
-                <span className="absolute top-3 right-3 bg-lavender-500 text-white rounded-full p-0.5">
+                <span className="absolute top-3 right-3 bg-frida-primary text-light-text rounded-full p-0.5">
                   <Check size={12} strokeWidth={3} />
                 </span>
               )}
-              <Moon size={28} className={theme === 'dark' ? 'text-lavender-400' : 'text-warmgray-400'} />
+              <Moon size={28} className={theme === 'dark' ? 'text-frida-primary' : 'text-warmgray-450'} />
               <span className="text-sm font-bold mt-3">Modo Oscuro</span>
-              <span className="text-[10px] text-warmgray-400 mt-1">Relajante y profundo</span>
+              <span className="text-[10px] text-warmgray-455 mt-1">Relajante y profundo</span>
             </button>
           </div>
         </section>
 
         {/* SECCIÓN DATOS */}
-        <section className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 shadow-sm transition-all duration-300">
-          <h2 className="text-lg font-bold text-lavender-950 dark:text-white mb-1">Copia de Seguridad y Datos</h2>
-          <p className="text-xs text-warmgray-400 mb-6">
+        <section className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 shadow-sm transition-all duration-300">
+          <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-1">Copia de Seguridad y Datos</h2>
+          <p className="text-xs text-warmgray-450 mb-6">
             Exporta tus tarjetas para guardarlas o limpia la base de datos de la app.
           </p>
 
           <div className="flex flex-col md:flex-row gap-4">
             {/* Exportar */}
-            <div className="flex-1 bg-lavender-50/40 dark:bg-lavender-950/10 border border-lavender-100 dark:border-lavender-950 rounded-2xl p-5 flex flex-col justify-between">
+            <div className="flex-1 bg-frida-secondary/10 dark:bg-frida-primary/5 border border-frida-primary/15 dark:border-lavender-950/30 rounded-2xl p-5 flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-bold text-lavender-900 dark:text-lavender-200 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-light-text dark:text-dark-text flex items-center gap-2">
                   <Download size={16} />
                   <span>Exportar Datos</span>
                 </h3>
-                <p className="text-xs text-warmgray-450 mt-1.5 leading-relaxed">
+                <p className="text-xs text-warmgray-455 mt-1.5 leading-relaxed">
                   Descarga un archivo JSON de respaldo con todas tus materias, mazos e historial de estudio.
                 </p>
               </div>
               <button
                 onClick={handleExport}
-                className="mt-5 w-full py-2.5 bg-lavender-500 hover:bg-lavender-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+                className="mt-5 w-full py-2.5 bg-frida-primary hover:bg-frida-primary/90 text-light-text font-bold rounded-xl text-xs transition-colors shadow-sm shadow-frida-primary/10"
               >
                 Exportar JSON
               </button>
@@ -160,8 +160,8 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 bg-lavender-950 text-white dark:bg-lavender-100 dark:text-lavender-950 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-lavender-800 dark:border-lavender-200">
-          <Sparkles size={16} className="text-lavender-400 dark:text-lavender-600" />
+        <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
+          <Sparkles size={16} className="text-frida-primary" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -169,12 +169,12 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
       {/* MODAL DE CONFIRMACIÓN PARA BORRAR */}
       {showConfirmDelete && (
         <div className="fixed inset-0 bg-lavender-950/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 w-full max-w-md shadow-2xl relative animate-slide-up">
+          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 w-full max-w-md shadow-2xl relative animate-slide-up">
             <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-2xl flex items-center justify-center text-red-500 dark:text-red-400 mb-4 mx-auto">
               <ShieldAlert size={26} />
             </div>
 
-            <h3 className="text-xl font-bold text-lavender-950 dark:text-white mb-2 text-center">
+            <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-2 text-center">
               ¿Estás completamente seguro?
             </h3>
             <p className="text-xs text-warmgray-400 mb-6 text-center leading-relaxed">

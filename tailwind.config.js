@@ -31,7 +31,17 @@ module.exports = {
           300: '#dbd8d3',
           400: '#a7a29a',
           900: '#2d2b2a',
-        }
+        },
+        'frida-primary': '#9FA1FF',
+        'frida-secondary': '#B5BAFF',
+        'frida-accent': '#AEE2FF',
+        'frida-success': '#D9F9DF',
+        'light-bg': '#F7F8FF',
+        'light-card': '#FFFFFF',
+        'light-text': '#1C1B2E',
+        'dark-bg': '#121124',
+        'dark-card': '#1C1A36',
+        'dark-text': '#F0F1FF',
       },
       borderRadius: {
         '2xl': '1rem',

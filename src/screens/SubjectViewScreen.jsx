@@ -29,20 +29,20 @@ export default function SubjectViewScreen({
   };
 
   return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto px-6 py-8 overflow-y-auto animate-fade-in text-warmgray-900 dark:text-darkText">
+    <div className="flex flex-col h-full max-w-5xl mx-auto px-6 py-8 overflow-y-auto animate-fade-in text-light-text dark:text-dark-text">
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-warmgray-450 hover:text-lavender-900 dark:text-warmgray-400 dark:hover:text-lavender-300 transition-colors text-sm font-medium mb-4"
+            className="flex items-center gap-1.5 text-warmgray-450 hover:text-frida-primary dark:text-warmgray-400 dark:hover:text-frida-secondary transition-colors text-sm font-medium mb-4"
           >
             <ArrowLeft size={18} />
             <span>Volver a Materias</span>
           </button>
 
-          <h1 className="text-3xl font-extrabold text-lavender-950 dark:text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-extrabold text-light-text dark:text-dark-text tracking-tight flex items-center gap-3">
             <span>{subject.name}</span>
-            <span className="text-sm font-bold bg-lavender-100 dark:bg-lavender-950/50 text-lavender-700 dark:text-lavender-300 px-2.5 py-0.5 rounded-full">
+            <span className="text-sm font-bold bg-frida-secondary/30 dark:bg-frida-primary/25 text-frida-primary dark:text-frida-secondary px-2.5 py-0.5 rounded-full">
               Materia
             </span>
           </h1>
@@ -55,7 +55,7 @@ export default function SubjectViewScreen({
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenSettings}
-            className="p-3 text-warmgray-450 hover:text-lavender-650 dark:text-warmgray-300 dark:hover:text-lavender-400 hover:bg-lavender-50 dark:hover:bg-lavender-950/20 rounded-2xl transition-all duration-200"
+            className="p-3 text-warmgray-450 hover:text-frida-primary dark:text-warmgray-300 dark:hover:text-frida-primary hover:bg-frida-primary/10 dark:hover:bg-frida-primary/20 rounded-2xl transition-all duration-200"
             title="Configuración"
           >
             <Settings size={20} />
@@ -63,7 +63,7 @@ export default function SubjectViewScreen({
           
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-lavender-500 hover:bg-lavender-600 active:scale-[0.98] text-white font-bold rounded-2xl transition-all duration-200 shadow-sm shadow-lavender-100 dark:shadow-none"
+            className="flex items-center gap-2 px-5 py-3 bg-frida-primary hover:bg-frida-primary/90 active:scale-[0.98] text-light-text font-extrabold rounded-2xl transition-all duration-200 shadow-sm shadow-frida-secondary/30 dark:shadow-none"
           >
             <Plus size={18} />
             <span>Crear Mazo</span>
@@ -72,23 +72,23 @@ export default function SubjectViewScreen({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
-          <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-400 uppercase tracking-wider">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+          <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-450 uppercase tracking-wider">
             Mazos
           </span>
-          <span className="text-2xl font-bold text-lavender-900 dark:text-white mt-2">{stats.deckCount}</span>
+          <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{stats.deckCount}</span>
         </div>
-        <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
-          <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-400 uppercase tracking-wider">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+          <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-450 uppercase tracking-wider">
             Tarjetas
           </span>
-          <span className="text-2xl font-bold text-lavender-900 dark:text-white mt-2">{stats.cardCount}</span>
+          <span className="text-2xl font-bold text-light-text dark:text-dark-text mt-2">{stats.cardCount}</span>
         </div>
-        <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
-          <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-400 uppercase tracking-wider">
+        <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-5 shadow-sm flex flex-col justify-between transition-colors duration-300">
+          <span className="text-xs font-semibold text-warmgray-455 dark:text-warmgray-455 uppercase tracking-wider">
             Pendientes Hoy
           </span>
-          <span className={`text-2xl font-bold mt-2 ${stats.dueCards > 0 ? 'text-lavender-500 dark:text-lavender-450' : 'text-green-500 dark:text-green-400'}`}>
+          <span className={`text-2xl font-bold mt-2 ${stats.dueCards > 0 ? 'text-frida-primary' : 'text-green-500 dark:text-green-400'}`}>
             {stats.dueCards}
           </span>
         </div>
@@ -96,8 +96,8 @@ export default function SubjectViewScreen({
 
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-4">
-          <FolderOpen size={18} className="text-lavender-400 dark:text-lavender-500" />
-          <h2 className="text-xl font-bold text-lavender-950 dark:text-white">Mazos dentro de esta materia</h2>
+          <FolderOpen size={18} className="text-frida-primary" />
+          <h2 className="text-xl font-bold text-light-text dark:text-dark-text">Mazos dentro de esta materia</h2>
         </div>
 
         <DeckList
@@ -111,22 +111,22 @@ export default function SubjectViewScreen({
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-lavender-950/20 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-darkCard rounded-3xl border border-lavender-100 dark:border-lavender-950 p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-colors duration-300">
+          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-colors duration-300">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-2 text-warmgray-400 dark:text-warmgray-500 hover:text-lavender-950 dark:hover:text-white hover:bg-lavender-50 dark:hover:bg-lavender-950/30 rounded-xl transition-all"
+              className="absolute top-4 right-4 p-2 text-warmgray-400 dark:text-warmgray-500 hover:text-light-text dark:hover:text-white hover:bg-frida-secondary/15 dark:hover:bg-frida-primary/10 rounded-xl transition-all"
             >
               <X size={18} />
             </button>
 
-            <h3 className="text-xl font-bold text-lavender-950 dark:text-white mb-1">Crear Nuevo Mazo</h3>
+            <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-1">Crear Nuevo Mazo</h3>
             <p className="text-xs text-warmgray-450 mb-6">
-              Este mazo quedará asociado a <span className="font-semibold text-lavender-700 dark:text-lavender-400">{subject.name}</span>.
+              Este mazo quedará asociado a <span className="font-semibold text-frida-primary dark:text-frida-secondary">{subject.name}</span>.
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-bold text-lavender-800 dark:text-lavender-400 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-frida-primary dark:text-frida-secondary uppercase tracking-wider mb-1">
                   Nombre del mazo
                 </label>
                 <input
@@ -135,7 +135,7 @@ export default function SubjectViewScreen({
                   placeholder="Ej. Verbos Irregulares, Anatomía..."
                   value={newDeckName}
                   onChange={(e) => setNewDeckName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 dark:bg-lavender-950/20 border border-lavender-100 dark:border-lavender-950 focus:border-lavender-400 focus:bg-white dark:focus:bg-darkCard text-sm text-lavender-950 dark:text-white focus:outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-2xl bg-light-bg dark:bg-dark-bg/40 border border-frida-primary/20 dark:border-lavender-950/60 focus:border-frida-primary focus:bg-light-card dark:focus:bg-dark-card text-sm text-light-text dark:text-dark-text focus:outline-none transition-all duration-200"
                 />
               </div>
 
@@ -149,7 +149,7 @@ export default function SubjectViewScreen({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-sm font-bold bg-lavender-500 hover:bg-lavender-600 text-white rounded-2xl transition-colors duration-200 shadow-sm"
+                  className="flex-1 py-3 text-sm font-extrabold bg-frida-primary hover:bg-frida-primary/95 text-light-text rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/20"
                 >
                   Crear Mazo
                 </button>
