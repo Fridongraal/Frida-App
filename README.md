@@ -1,4 +1,4 @@
-# Frida 🌸 — Repetición Espaciada Minimalista
+# Frida 🐶— Repetición Espaciada Minimalista
 
 Frida es un clon moderno, intuitivo y estéticamente agradable de Anki enfocado en la repetición espaciada. Está construido para uso personal y para compartir con amigos, con un diseño basado en tonos lavanda relajantes, animaciones fluidas y una experiencia de usuario sin distracciones.
 
