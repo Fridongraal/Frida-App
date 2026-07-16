@@ -7,6 +7,7 @@ import {
   createEmptyStore,
   deleteCardFromDeck,
   deleteDeckFromSubject,
+  deleteSubject,
   findDeckLocation,
   normalizeStore,
   updateCardAlgorithm,
@@ -112,6 +113,10 @@ export function useFridaData() {
     );
   };
 
+  const removeSubject = (subjectId) => {
+    persistStore(deleteSubject(store, subjectId));
+  };
+
   const deleteDeck = (deckId) => {
     const location = findDeckLocation(store, deckId);
     if (!location) return;
@@ -144,6 +149,7 @@ export function useFridaData() {
     reviewCard,
     deleteDeck,
     deleteCard,
+    deleteSubject: removeSubject,
     saveStore: persistStore,
   };
 }

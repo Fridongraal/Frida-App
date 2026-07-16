@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload } from 'lucide-react';
+import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload, Trash2 } from 'lucide-react';
 import { getSubjectSummary } from '../utils/fridaStore';
 
-export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenCSVImporter }) {
+export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenCSVImporter, onDeleteSubject }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
 
   const totalSubjects = subjects.length;
   const totalDecks = decks.length;
@@ -113,10 +114,13 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
               const stats = getSubjectSummary(subject, new Date());
 
               return (
-                <button
+                <div
                   key={subject.id}
-                  onClick={() => onOpenSubject(subject.id)}
-                  className="text-left group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-frida-primary/60 transition-all duration-300"
+                  onClick={(e) => {
+                    if (e.target.closest('.delete-subject-btn')) return;
+                    onOpenSubject(subject.id);
+                  }}
+                  className="cursor-pointer text-left group relative flex flex-col justify-between p-6 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm hover:shadow-md hover:border-frida-primary/30 dark:hover:border-frida-primary/60 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
@@ -131,7 +135,19 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                       </div>
                     </div>
 
-                    <ChevronRight size={18} className="text-warmgray-300 dark:text-warmgray-600 group-hover:text-frida-primary transition-colors mt-1" />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSubjectToDelete(subject);
+                        }}
+                        className="delete-subject-btn p-2 text-warmgray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all duration-200"
+                        title="Eliminar materia"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <ChevronRight size={18} className="text-warmgray-300 dark:text-warmgray-600 group-hover:text-frida-primary transition-colors" />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mt-6">
@@ -160,7 +176,7 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                       <ChevronRight size={16} />
                     </span>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -213,6 +229,34 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {subjectToDelete && (
+        <div className="fixed inset-0 bg-light-bg/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-light-card dark:bg-dark-card rounded-3xl border border-red-500/25 dark:border-red-500/35 p-6 w-full max-w-md shadow-2xl relative animate-slide-up transition-all duration-300">
+            <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-2">¿Eliminar Materia?</h3>
+            <p className="text-sm text-warmgray-455 dark:text-warmgray-450 mb-6">
+              Esta acción eliminará la materia <strong className="text-light-text dark:text-white">"{subjectToDelete.name}"</strong> y todos sus mazos y tarjetas de forma permanente. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSubjectToDelete(null)}
+                className="flex-1 py-3 bg-light-card dark:bg-dark-muted/20 hover:bg-frida-secondary/15 dark:hover:bg-dark-muted/30 text-warmgray-455 dark:text-warmgray-400 border border-frida-primary/20 dark:border-dark-muted font-bold rounded-2xl transition-all duration-200 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteSubject(subjectToDelete.id);
+                  setSubjectToDelete(null);
+                }}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-extrabold rounded-2xl transition-all duration-200 text-sm shadow-sm shadow-red-500/20"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
         </div>
       )}

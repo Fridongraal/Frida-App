@@ -103,6 +103,7 @@ export default function App() {
             onOpenSubject={navigateToSubject}
             onOpenSettings={() => setCurrentScreen('settings')}
             onOpenCSVImporter={() => handleOpenCSVImporter(null)}
+            onDeleteSubject={deleteSubject}
           />
         )}
 

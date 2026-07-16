@@ -237,6 +237,15 @@ export function updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlg
   };
 }
 
+export function deleteSubject(store, subjectId) {
+  const normalized = normalizeStore(store);
+
+  return {
+    ...normalized,
+    subjects: normalized.subjects.filter((subject) => subject.id !== subjectId),
+  };
+}
+
 export function deleteDeckFromSubject(store, subjectId, deckId) {
   const normalized = normalizeStore(store);
 
