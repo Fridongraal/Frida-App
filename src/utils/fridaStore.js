@@ -332,9 +332,39 @@ export function getSubjectSummary(subject, asOf = new Date()) {
   return { deckCount, cardCount, dueCards };
 }
 
+export function filterCards(deck, asOf = new Date()) {
+  const cards = deck?.cards || [];
+  const cutoff = asOf instanceof Date ? asOf.getTime() : new Date(asOf).getTime();
+
+  const newCards = [];
+  const learningCards = [];
+  const reviewCards = [];
+
+  for (const card of cards) {
+    const reps = card.algorithm?.repetitions ?? card.repetitions ?? 0;
+    const interval = card.algorithm?.interval ?? card.interval ?? 1;
+    const nextReviewDate = card.algorithm?.nextReviewDate || card.nextReviewDate;
+
+    if (reps === 0) {
+      newCards.push(card);
+    } else if (interval < 1) {
+      learningCards.push(card);
+    } else if (nextReviewDate && new Date(nextReviewDate).getTime() <= cutoff) {
+      reviewCards.push(card);
+    }
+  }
+
+  return {
+    newCards,
+    learningCards,
+    reviewCards,
+    total: newCards.length + learningCards.length + reviewCards.length
+  };
+}
+
 export function getDeckSummary(deck, asOf = new Date()) {
   const cardCount = deck?.cards?.length || 0;
-  const dueCards = deck?.cards?.filter((card) => isCardDue(card, asOf)).length || 0;
+  const dueCards = filterCards(deck, asOf).total;
 
   return { cardCount, dueCards };
 }
