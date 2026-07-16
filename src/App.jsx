@@ -21,6 +21,7 @@ export default function App() {
     importCards,
     reviewCard,
     deleteCard,
+    deleteSubject,
     saveStore
   } = useFridaData();
   const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study', 'settings'
