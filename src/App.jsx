@@ -22,7 +22,11 @@ export default function App() {
     reviewCard,
     deleteCard,
     deleteSubject,
-    saveStore
+    saveStore,
+    streakCount,
+    lastStudyDate,
+    todayCardsCount,
+    lastActiveDate
   } = useFridaData();
   const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study', 'settings'
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
@@ -105,6 +109,8 @@ export default function App() {
             onOpenSettings={() => setCurrentScreen('settings')}
             onOpenCSVImporter={() => handleOpenCSVImporter(null)}
             onDeleteSubject={deleteSubject}
+            streakCount={streakCount}
+            lastStudyDate={lastStudyDate}
           />
         )}
 
@@ -119,6 +125,8 @@ export default function App() {
             onBack={navigateToHome}
             onOpenSettings={() => setCurrentScreen('settings')}
             onOpenCSVImporter={(deckId) => handleOpenCSVImporter(deckId)}
+            streakCount={streakCount}
+            lastStudyDate={lastStudyDate}
           />
         )}
 
@@ -138,6 +146,9 @@ export default function App() {
             deck={selectedDeck}
             onReviewCard={reviewCard}
             onBack={navigateBackFromDetail}
+            streakCount={streakCount}
+            lastStudyDate={lastStudyDate}
+            todayCardsCount={todayCardsCount}
           />
         )}
 

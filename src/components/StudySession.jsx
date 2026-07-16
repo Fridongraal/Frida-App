@@ -9,9 +9,12 @@ import {
   ArrowRight,
   Layers,
   LogOut,
+  Flame,
 } from 'lucide-react';
 import Flashcard from './Flashcard';
+import confetti from 'canvas-confetti';
 import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
+import { getDisplayStreak } from '../utils/streakManager';
 import { applyStudyAction, getStudyActionPreview } from '../utils/fridaReview';
 
 function buildInitialSessionState(cards) {
@@ -92,7 +95,7 @@ function FeedbackButton({ tone, label, shortcut, icon: Icon, active, onClick }) 
   );
 }
 
-export default function StudySession({ deck, onReviewCard, onBack }) {
+export default function StudySession({ deck, onReviewCard, onBack, streakCount, lastStudyDate, todayCardsCount }) {
   const [dueCards, setDueCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -109,6 +112,28 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const activeShortcutTimerRef = useRef(null);
   const lastDeckIdRef = useRef(null);
   const flippedAtRef = useRef(0);
+
+  const displayStreak = getDisplayStreak({ streakCount, lastStudyDate });
+
+  useEffect(() => {
+    if (sessionCompleted) {
+      const colors = ['#9FA1FF', '#AEE2FF', '#FFFFFF', '#B5BAFF'];
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.8 },
+        colors: colors
+      });
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.8 },
+        colors: colors
+      });
+    }
+  }, [sessionCompleted]);
 
   const handleSaveAndExit = () => {
     setIsSavingAndExiting(true);
@@ -367,7 +392,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
             <h3 className="text-sm font-semibold text-frida-primary dark:text-dark-muted mb-4 uppercase tracking-wider">
               Resumen de respuestas
             </h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="p-3 bg-red-50/60 dark:bg-red-950/20 rounded-2xl">
                 <span className="block text-xl font-bold text-red-500 dark:text-red-400">{stats.dificil}</span>
                 <span className="text-[10px] font-semibold text-red-400 dark:text-red-500 uppercase">Otra vez</span>
@@ -381,6 +406,24 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
                 <span className="text-[10px] font-semibold text-sky-650 dark:text-sky-350 uppercase">Fácil</span>
               </div>
             </div>
+
+            {/* Daily Streak Flame / Milestone Info */}
+            {todayCardsCount >= 5 ? (
+              <div className="mt-2 p-3 bg-orange-500/10 border border-orange-500/25 rounded-2xl flex items-center justify-center gap-2 text-orange-500 font-extrabold text-xs animate-pulse">
+                <Flame size={16} fill="currentColor" className="animate-bounce" />
+                <span>¡Racha diaria mantenida! Racha de {displayStreak.count} día{displayStreak.count === 1 ? '' : 's'} 🔥</span>
+              </div>
+            ) : (
+              <div className="mt-2 p-3 bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 rounded-2xl flex flex-col items-center gap-1.5">
+                <div className="flex items-center gap-1.5 text-frida-primary font-bold text-xs">
+                  <Flame size={14} />
+                  <span>Meta diaria: {todayCardsCount} de 5 tarjetas</span>
+                </div>
+                <p className="text-[10px] text-warmgray-450 dark:text-warmgray-400">
+                  ¡Estudia {5 - todayCardsCount} tarjetas más hoy para mantener tu racha!
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -432,7 +475,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
           </div>
           <div className="w-full h-2 bg-frida-secondary/15 dark:bg-dark-muted/20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-frida-primary transition-all duration-300 rounded-full"
+              className="h-full bg-frida-primary transition-all duration-500 ease-out rounded-full"
               style={{ width: `${progressPercent || 5}%` }}
             />
           </div>

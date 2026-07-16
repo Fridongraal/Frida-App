@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload, Trash2 } from 'lucide-react';
+import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload, Trash2, Flame } from 'lucide-react';
 import { getSubjectSummary } from '../utils/fridaStore';
+import { getDisplayStreak } from '../utils/streakManager';
 
-export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenCSVImporter, onDeleteSubject }) {
+export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenCSVImporter, onDeleteSubject, streakCount, lastStudyDate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [subjectToDelete, setSubjectToDelete] = useState(null);
+  
+  const displayStreak = getDisplayStreak({ streakCount, lastStudyDate });
 
   const totalSubjects = subjects.length;
   const totalDecks = decks.length;
@@ -36,9 +39,28 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Daily Streak Flame Icon */}
+          <div 
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl border transition-all duration-300 shadow-sm ${
+              displayStreak.active
+                ? 'bg-orange-500/15 dark:bg-orange-500/10 border-orange-500/30 text-orange-500 animate-pulse'
+                : 'bg-warmgray-50/50 dark:bg-dark-muted/20 border-warmgray-200 dark:border-dark-muted text-warmgray-400 dark:text-warmgray-450 opacity-60'
+            }`}
+            title={
+              displayStreak.active
+                ? `¡Meta diaria cumplida! Racha de ${displayStreak.count} día(s) 🔥`
+                : displayStreak.count > 0
+                  ? `Estudia 5 tarjetas hoy para mantener tu racha de ${displayStreak.count} día(s)`
+                  : 'Completa 5 tarjetas hoy para iniciar tu racha'
+            }
+          >
+            <Flame size={18} fill={displayStreak.active ? "currentColor" : "none"} className={displayStreak.active ? "text-orange-500 animate-bounce" : ""} />
+            <span className="text-sm font-extrabold">{displayStreak.count}</span>
+          </div>
+
           <button
             onClick={onOpenSettings}
-            className="p-3 text-warmgray-450 hover:text-frida-primary dark:text-warmgray-300 dark:hover:text-frida-primary hover:bg-frida-primary/10 dark:hover:bg-frida-primary/20 rounded-2xl transition-all duration-200"
+            className="p-3 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-300 dark:hover:text-frida-primary hover:bg-frida-primary/10 dark:hover:bg-frida-primary/20 rounded-2xl transition-all duration-200"
             title="Configuración"
           >
             <Settings size={20} />

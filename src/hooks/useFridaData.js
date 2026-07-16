@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { applyStudyAction } from '../utils/fridaReview';
+import { processCardReviewStreak } from '../utils/streakManager';
 import {
   addCardToDeck,
   addDeckToSubject,
@@ -103,14 +104,15 @@ export function useFridaData() {
 
     if (!persistAlgorithm) return;
 
-    persistStore(
-      updateCardAlgorithm(store, subject.id, deckId, cardId, {
-        interval: persistAlgorithm.interval,
-        easeFactor: persistAlgorithm.easeFactor,
-        repetitions: persistAlgorithm.repetitions,
-        nextReviewDate: persistAlgorithm.nextReviewDate,
-      })
-    );
+    const nextStore = updateCardAlgorithm(store, subject.id, deckId, cardId, {
+      interval: persistAlgorithm.interval,
+      easeFactor: persistAlgorithm.easeFactor,
+      repetitions: persistAlgorithm.repetitions,
+      nextReviewDate: persistAlgorithm.nextReviewDate,
+    });
+
+    const storeWithStreak = processCardReviewStreak(nextStore);
+    persistStore(storeWithStreak);
   };
 
   const removeSubject = (subjectId) => {
@@ -151,5 +153,9 @@ export function useFridaData() {
     deleteCard,
     deleteSubject: removeSubject,
     saveStore: persistStore,
+    streakCount: store.streakCount || 0,
+    lastStudyDate: store.lastStudyDate || null,
+    todayCardsCount: store.todayCardsCount || 0,
+    lastActiveDate: store.lastActiveDate || null,
   };
 }

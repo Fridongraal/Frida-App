@@ -16,7 +16,13 @@ function createDefaultAlgorithm(algorithm = {}) {
 }
 
 export function createEmptyStore() {
-  return { subjects: [] };
+  return {
+    subjects: [],
+    streakCount: 0,
+    lastStudyDate: null,
+    todayCardsCount: 0,
+    lastActiveDate: null
+  };
 }
 
 export function normalizeCard(card) {
@@ -64,43 +70,47 @@ function normalizeLegacyDeck(deck) {
 
 export function normalizeStore(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
+  const streakCount = typeof source.streakCount === 'number' ? source.streakCount : 0;
+  const lastStudyDate = typeof source.lastStudyDate === 'string' ? source.lastStudyDate : null;
+  const todayCardsCount = typeof source.todayCardsCount === 'number' ? source.todayCardsCount : 0;
+  const lastActiveDate = typeof source.lastActiveDate === 'string' ? source.lastActiveDate : null;
+
+  let subjects = [];
 
   if (Array.isArray(source.subjects)) {
-    return {
-      subjects: source.subjects.map(normalizeSubject).filter(Boolean),
-    };
-  }
+    subjects = source.subjects.map(normalizeSubject).filter(Boolean);
+  } else {
+    const legacyFolders = Array.isArray(source.folders) ? source.folders : [];
+    const legacyDecks = Array.isArray(source.decks) ? source.decks : [];
 
-  const legacyFolders = Array.isArray(source.folders) ? source.folders : [];
-  const legacyDecks = Array.isArray(source.decks) ? source.decks : [];
-
-  if (legacyFolders.length > 0) {
-    return {
-      subjects: legacyFolders.map((folder) => ({
+    if (legacyFolders.length > 0) {
+      subjects = legacyFolders.map((folder) => ({
         id: folder.id || createId('subject'),
         name: folder.name || 'Sin nombre',
         createdAt: folder.createdAt || nowIso(),
         decks: legacyDecks
           .filter((deck) => deck.folderId === folder.id)
           .map(normalizeLegacyDeck),
-      })),
-    };
-  }
-
-  if (legacyDecks.length > 0) {
-    return {
-      subjects: [
+      }));
+    } else if (legacyDecks.length > 0) {
+      subjects = [
         {
           id: 'subject-general',
           name: 'General',
           createdAt: nowIso(),
           decks: legacyDecks.map(normalizeLegacyDeck),
         },
-      ],
-    };
+      ];
+    }
   }
 
-  return createEmptyStore();
+  return {
+    subjects,
+    streakCount,
+    lastStudyDate,
+    todayCardsCount,
+    lastActiveDate
+  };
 }
 
 export function addSubject(store, subjectName) {
