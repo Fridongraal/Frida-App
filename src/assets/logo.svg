@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none">
+  <defs>
+    <linearGradient id="lavenderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b499f7" />
+      <stop offset="100%" stop-color="#8454e9" />
+    </linearGradient>
+  </defs>
+  <!-- Background Card -->
+  <rect x="6" y="6" width="12" height="14" rx="3" fill="#ede9fe" transform="rotate(-10 12 13)" />
+  <!-- Foreground Card -->
+  <rect x="7" y="5" width="12" height="14" rx="3" fill="url(#lavenderGrad)" />
+  <!-- Highlight Sparkle -->
+  <path d="M16 4L16.5 5.5L18 6L16.5 6.5L16 8L15.5 6.5L14 6L15.5 5.5L16 4Z" fill="#ffffff" />
+</svg>
