@@ -377,56 +377,58 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
   const isShortLearning = Boolean(currentSessionState?.awaitingGraduation || currentCardView?.algorithm?.repetitions === 0);
 
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto px-4 py-2 justify-between text-light-text dark:text-dark-text">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-400 dark:hover:text-frida-secondary transition-colors text-sm font-medium"
-        >
-          <ChevronLeft size={18} />
-          <span>Salir del estudio</span>
-        </button>
+    <div className="flex flex-col h-full w-full max-w-xl mx-auto px-4 py-4 justify-between text-light-text dark:text-dark-text overflow-y-auto">
+      <div className="w-full flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-400 dark:hover:text-frida-secondary transition-colors text-sm font-medium"
+          >
+            <ChevronLeft size={18} />
+            <span>Salir del estudio</span>
+          </button>
 
-        <div className="flex items-center gap-2">
-          {currentCardView && (
-            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getCardCategoryInfo(currentCardView).classes}`}>
-              {getCardCategoryInfo(currentCardView).label}
+          <div className="flex items-center gap-2">
+            {currentCardView && (
+              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getCardCategoryInfo(currentCardView).classes}`}>
+                {getCardCategoryInfo(currentCardView).label}
+              </span>
+            )}
+            <span className="text-xs font-bold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-dark-muted px-3 py-1 rounded-full border border-frida-primary/20 dark:border-dark-muted">
+              Mazo: {deck.name}
             </span>
-          )}
-          <span className="text-xs font-bold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-dark-muted px-3 py-1 rounded-full border border-frida-primary/20 dark:border-dark-muted">
-            Mazo: {deck.name}
-          </span>
+          </div>
         </div>
+
+        <div className="w-full">
+          <div className="flex justify-between text-xs text-warmgray-455 dark:text-warmgray-455 mb-1.5 font-semibold">
+            <span>Progreso de hoy</span>
+            <span>
+              {Math.min(currentIndex + 1, dueCards.length)} de {dueCards.length} tarjetas
+            </span>
+          </div>
+          <div className="w-full h-2 bg-frida-secondary/15 dark:bg-dark-muted/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-frida-primary transition-all duration-300 rounded-full"
+              style={{ width: `${progressPercent || 5}%` }}
+            />
+          </div>
+        </div>
+
+        {strictlyDueCount > 0 && currentIndex >= strictlyDueCount && (
+          <div className="w-full bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 text-green-800 dark:text-green-300 px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm flex items-center justify-center gap-2 mb-2 animate-bounce">
+            <span>🎉🎉 ¡Completaste las tarjetas programadas para hoy! Puedes salir o continuar repasando el resto del mazo.</span>
+          </div>
+        )}
+
+        {strictlyDueCount === 0 && (
+          <div className="w-full bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 text-frida-primary dark:text-frida-secondary px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm">
+            <span>⚡ Estás adelantando repasos futuros. Tus respuestas actualizarán el algoritmo.</span>
+          </div>
+        )}
       </div>
 
-      <div className="w-full mb-6">
-        <div className="flex justify-between text-xs text-warmgray-455 dark:text-warmgray-455 mb-1.5 font-semibold">
-          <span>Progreso de hoy</span>
-          <span>
-            {Math.min(currentIndex + 1, dueCards.length)} de {dueCards.length} tarjetas
-          </span>
-        </div>
-        <div className="w-full h-2 bg-frida-secondary/15 dark:bg-dark-muted/20 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-frida-primary transition-all duration-300 rounded-full"
-            style={{ width: `${progressPercent || 5}%` }}
-          />
-        </div>
-      </div>
-
-      {strictlyDueCount > 0 && currentIndex >= strictlyDueCount && (
-        <div className="w-full bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 text-green-800 dark:text-green-300 px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm flex items-center justify-center gap-2 mb-2 animate-bounce">
-          <span>🎉🎉 ¡Completaste las tarjetas programadas para hoy! Puedes salir o continuar repasando el resto del mazo.</span>
-        </div>
-      )}
-
-      {strictlyDueCount === 0 && (
-        <div className="w-full bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 text-frida-primary dark:text-frida-secondary px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm mb-2">
-          <span>⚡ Estás adelantando repasos futuros. Tus respuestas actualizarán el algoritmo.</span>
-        </div>
-      )}
-
-      <div className="flex-1 flex items-center justify-center my-4">
+      <div className="flex-1 w-full flex items-center justify-center my-6">
          {currentCardView && (
           <Flashcard
             card={currentCardView}
@@ -445,7 +447,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
         )}
       </div>
 
-      <div className="mt-4 min-h-[120px] flex flex-col justify-center">
+        <div className="mt-4 min-h-[120px] w-full flex flex-col justify-center">
         {!isFlipped ? (
           <button
             onClick={() => {
@@ -453,7 +455,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
               setIsFlipped(true);
               flippedAtRef.current = Date.now();
             }}
-            className="w-full max-w-md mx-auto py-4 bg-frida-primary hover:bg-frida-primary/95 active:scale-[0.98] text-light-text font-extrabold rounded-2xl shadow transition-all duration-200 flex items-center justify-center gap-2 shadow-frida-secondary/25"
+            className="w-full max-w-xl mx-auto py-4 bg-frida-primary hover:bg-frida-primary/95 active:scale-[0.98] text-light-text font-extrabold rounded-2xl shadow transition-all duration-200 flex items-center justify-center gap-2 shadow-frida-secondary/25"
           >
             <RefreshCw size={18} className="animate-spin-slow text-light-text" />
             <span>Mostrar respuesta</span>
@@ -462,7 +464,7 @@ export default function StudySession({ deck, onReviewCard, onBack }) {
             </kbd>
           </button>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl mx-auto animate-slide-up">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mx-auto animate-slide-up">
             <FeedbackButton
               tone="again"
               label="Otra vez (<1m)"
