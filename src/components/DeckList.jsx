@@ -1,13 +1,12 @@
 import React from 'react';
 import { BookOpen, PlusCircle, Trash2, Layers } from 'lucide-react';
+import { isCardDue as isCardDueHelper } from '../utils/fridaStore';
 
 /**
  * Función para verificar si una tarjeta está pendiente para estudio hoy.
  */
 export function isCardDue(card) {
-  const now = new Date();
-  now.setHours(23, 59, 59, 999); // Incluye todo el día de hoy
-  return new Date(card.nextReviewDate) <= now;
+  return isCardDueHelper(card, new Date());
 }
 
 export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck }) {

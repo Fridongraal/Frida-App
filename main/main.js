@@ -1,210 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const fs = require('fs');
+const { getStore, saveStore } = require('./storage');
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
-const DATA_FILE = path.join(app.getPath('userData'), 'frida-data.json');
-
-function createId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function normalizeFolder(folder) {
-  if (!folder || typeof folder !== 'object') return null;
-
-  return {
-    id: folder.id || createId('folder'),
-    name: folder.name || 'Sin nombre',
-    createdAt: folder.createdAt || new Date().toISOString()
-  };
-}
-
-function normalizeCard(card, deckId) {
-  if (!card || typeof card !== 'object') return null;
-
-  return {
-    id: card.id || createId('card'),
-    deckId: card.deckId || deckId,
-    front: card.front || '',
-    back: card.back || '',
-    interval: Number.isFinite(card.interval) ? card.interval : 1,
-    easeFactor: Number.isFinite(card.easeFactor) ? card.easeFactor : 2.5,
-    repetitions: Number.isFinite(card.repetitions) ? card.repetitions : 0,
-    nextReviewDate: card.nextReviewDate || new Date().toISOString()
-  };
-}
-
-function normalizeDeck(deck, folderId) {
-  if (!deck || typeof deck !== 'object') return null;
-
-  const normalizedDeckId = deck.id || createId('deck');
-  const cards = Array.isArray(deck.cards)
-    ? deck.cards.map((card) => normalizeCard(card, normalizedDeckId)).filter(Boolean)
-    : [];
-
-  return {
-    id: normalizedDeckId,
-    folderId: deck.folderId || folderId,
-    name: deck.name || 'Sin nombre',
-    description: deck.description || '',
-    cards
-  };
-}
-
-function createInitialData() {
-  const folderId = 'folder-idiomas';
-
-  return {
-    folders: [
-      {
-        id: folderId,
-        name: 'Idiomas',
-        createdAt: new Date().toISOString()
-      }
-    ],
-    decks: [
-      normalizeDeck(
-        {
-          id: 'deck-1',
-          folderId,
-          name: 'Vocabulario de Inglés 🇬🇧',
-          description: 'Palabras y frases esenciales para mejorar tu vocabulario diario.',
-          cards: [
-            {
-              id: 'card-1',
-              deckId: 'deck-1',
-              front: 'Ephemeral',
-              back: 'Efímero / Que dura muy poco tiempo.',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            },
-            {
-              id: 'card-2',
-              deckId: 'deck-1',
-              front: 'Serendipity',
-              back: 'Serendipia / Hallazgo afortunado, valioso e inesperado.',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            },
-            {
-              id: 'card-3',
-              deckId: 'deck-1',
-              front: 'Melancholy',
-              back: 'Melancolía / Tristeza vaga, profunda, sosegada y permanente.',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            }
-          ]
-        },
-        folderId
-      ),
-      normalizeDeck(
-        {
-          id: 'deck-2',
-          folderId,
-          name: 'Capitales del Mundo 🌍',
-          description: 'Aprende y recuerda las capitales de diversos países del mundo.',
-          cards: [
-            {
-              id: 'card-4',
-              deckId: 'deck-2',
-              front: '¿Cuál es la capital de Australia?',
-              back: 'Canberra (mucha gente cree erróneamente que es Sydney o Melbourne).',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            },
-            {
-              id: 'card-5',
-              deckId: 'deck-2',
-              front: '¿Cuál es la capital de Canadá?',
-              back: 'Ottawa',
-              interval: 1,
-              easeFactor: 2.5,
-              repetitions: 0,
-              nextReviewDate: new Date().toISOString()
-            }
-          ]
-        },
-        folderId
-      )
-    ].filter(Boolean)
-  };
-}
-
-function normalizeData(raw) {
-  const source = raw && typeof raw === 'object' ? raw : {};
-  const rawFolders = Array.isArray(source.folders) ? source.folders : [];
-  const rawDecks = Array.isArray(source.decks) ? source.decks : [];
-
-  const folders = rawFolders.map(normalizeFolder).filter(Boolean);
-  const fallbackFolderId = folders[0]?.id || 'folder-general';
-
-  const decks = rawDecks
-    .map((deck) => normalizeDeck(deck, fallbackFolderId))
-    .filter(Boolean)
-    .map((deck) => {
-      const folderExists = folders.some((folder) => folder.id === deck.folderId);
-      return folderExists ? deck : { ...deck, folderId: fallbackFolderId };
-    });
-
-  const normalizedFolders =
-    folders.length > 0
-      ? folders
-      : decks.length > 0
-        ? [
-            {
-              id: fallbackFolderId,
-              name: 'General',
-              createdAt: new Date().toISOString()
-            }
-          ]
-        : [];
-
-  return {
-    folders: normalizedFolders,
-    decks
-  };
-}
-
-function readData() {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      const defaultData = createInitialData();
-      fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
-      return defaultData;
-    }
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    const normalized = normalizeData(JSON.parse(raw));
-    const parsed = JSON.parse(raw);
-    if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf-8');
-    }
-    return normalized;
-  } catch (err) {
-    console.error('Error loading data:', err);
-    return { folders: [], decks: [] };
-  }
-}
-
-// Helper to save data
-function writeData(data) {
-  try {
-    const normalized = normalizeData(data);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf-8');
-    return { success: true };
-  } catch (err) {
-    console.error('Error saving data:', err);
-    return { success: false, error: err.message };
-  }
-}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -219,7 +17,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false
     },
-    show: false, // Prevents white screen flash on load
+    show: false,
     backgroundColor: '#fafaf9'
   });
 
@@ -236,9 +34,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // Register IPC handlers
-  ipcMain.handle('load-data', () => readData());
-  ipcMain.handle('save-data', (event, data) => writeData(data));
+  ipcMain.handle('get-store', () => getStore());
+  ipcMain.handle('save-store', (_event, data) => saveStore(data));
+  ipcMain.handle('load-data', () => getStore());
+  ipcMain.handle('save-data', (_event, data) => saveStore(data));
 
   createWindow();
 
@@ -250,3 +49,4 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
+

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FolderPlus, Layers, X, ChevronRight, AlertCircle } from 'lucide-react';
 import { isCardDue } from '../components/DeckList';
-import { getFolderStats } from '../utils/dataModel';
+import { getSubjectSummary } from '../utils/fridaStore';
 
 export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolder }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,7 +95,18 @@ export default function HomeScreen({ folders, decks, onCreateFolder, onOpenFolde
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
             {folders.map((folder) => {
-              const stats = getFolderStats(folder.id, decks, isCardDue);
+              const stats = getSubjectSummary(
+                {
+                  ...folder,
+                  decks: decks
+                    .filter((deck) => deck.folderId === folder.id)
+                    .map((deck) => ({
+                      ...deck,
+                      cards: deck.cards || [],
+                    })),
+                },
+                new Date()
+              );
 
               return (
                 <button

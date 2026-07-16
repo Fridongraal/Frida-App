@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSpacedRepetition } from './hooks/useSpacedRepetition';
+import { useFridaData } from './hooks/useFridaData';
 import HomeScreen from './screens/HomeScreen';
 import SubjectViewScreen from './screens/SubjectViewScreen';
 import CreateCardScreen from './screens/CreateCardScreen';
@@ -17,7 +17,7 @@ export default function App() {
     addCard,
     reviewCard,
     deleteCard
-  } = useSpacedRepetition();
+  } = useFridaData();
   const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study'
   const [selectedFolderId, setSelectedFolderId] = useState(null);
   const [selectedDeckId, setSelectedDeckId] = useState(null);

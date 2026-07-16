@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Plus, FolderOpen, X } from 'lucide-react';
-import DeckList, { isCardDue } from '../components/DeckList';
-import { getFolderStats } from '../utils/dataModel';
+import DeckList from '../components/DeckList';
+import { getSubjectSummary } from '../utils/fridaStore';
 
 export default function SubjectViewScreen({
   folder,
@@ -14,17 +14,24 @@ export default function SubjectViewScreen({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
-  const [newDeckDesc, setNewDeckDesc] = useState('');
 
-  const stats = getFolderStats(folder.id, decks, isCardDue);
+  const stats = getSubjectSummary(
+    {
+      ...folder,
+      decks: decks.map((deck) => ({
+        ...deck,
+        cards: deck.cards || [],
+      })),
+    },
+    new Date()
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newDeckName.trim()) return;
 
-    onCreateDeck(folder.id, newDeckName.trim(), newDeckDesc.trim());
+    onCreateDeck(folder.id, newDeckName.trim());
     setNewDeckName('');
-    setNewDeckDesc('');
     setIsModalOpen(false);
   };
 
@@ -125,19 +132,6 @@ export default function SubjectViewScreen({
                   value={newDeckName}
                   onChange={(e) => setNewDeckName(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 border border-lavender-100 focus:border-lavender-400 focus:bg-white text-sm text-lavender-950 focus:outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-lavender-800 uppercase tracking-wider mb-1">
-                  Descripción (Opcional)
-                </label>
-                <textarea
-                  placeholder="Añade una descripción breve..."
-                  value={newDeckDesc}
-                  onChange={(e) => setNewDeckDesc(e.target.value)}
-                  rows="3"
-                  className="w-full px-4 py-3 rounded-2xl bg-warmgray-50 border border-lavender-100 focus:border-lavender-400 focus:bg-white text-sm text-lavender-950 focus:outline-none transition-all resize-none"
                 />
               </div>
 
