@@ -10,9 +10,11 @@ import {
   Layers,
   LogOut,
   Flame,
+  Download,
 } from 'lucide-react';
 import Flashcard from './Flashcard';
 import confetti from 'canvas-confetti';
+import Papa from 'papaparse';
 import { playAgain, playSuccess, playEasy, playComplete } from '../utils/soundManager';
 import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
@@ -109,6 +111,54 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
   const [activeShortcut, setActiveShortcut] = useState(null);
   const [strictlyDueCount, setStrictlyDueCount] = useState(0);
   const [isSavingAndExiting, setIsSavingAndExiting] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  const handleExportCSV = async () => {
+    if (!deck || !deck.cards || deck.cards.length === 0) {
+      triggerToast('El mazo no tiene tarjetas para exportar.');
+      return;
+    }
+
+    try {
+      const data = deck.cards.map(c => ({
+        Pregunta: c.front || '',
+        Respuesta: c.back || ''
+      }));
+
+      const csvContent = Papa.unparse(data, {
+        quotes: true,
+        newline: '\r\n'
+      });
+
+      const defaultFilename = `${deck.name.toLowerCase().replace(/[^a-z0-9]/gi, '_')}_exportado.csv`;
+
+      let saved = false;
+      if (window.electronAPI?.exportDeckToCSV) {
+        saved = await window.electronAPI.exportDeckToCSV(defaultFilename, csvContent);
+      } else {
+        const dataStr = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csvContent);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", defaultFilename);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        saved = true;
+      }
+
+      if (saved) {
+        triggerToast('¡Mazo exportado con éxito!');
+      }
+    } catch (error) {
+      console.error('Error al exportar mazo a CSV:', error);
+      triggerToast('Error al exportar el mazo.');
+    }
+  };
 
   const activeShortcutTimerRef = useRef(null);
   const lastDeckIdRef = useRef(null);
@@ -334,7 +384,7 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
   if (!started && !sessionCompleted) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
+      <div className="flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in relative">
         <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">{deck.name}</h2>
         <p className="text-sm text-warmgray-455 dark:text-warmgray-450 mb-8 max-w-md">
           Estás por comenzar tu sesión de estudio. Revisa el estado de tus tarjetas a continuación:
@@ -346,7 +396,7 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
           </p>
         )}
 
-        <div className="grid grid-cols-2 gap-4 w-full mb-10">
+        <div className="grid grid-cols-2 gap-4 w-full mb-6">
           <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-dark-muted rounded-2xl">
             <span className="text-2xl font-bold text-light-text dark:text-frida-secondary">{counts.newCount}</span>
             <span className="text-[10px] font-bold text-light-text/75 dark:text-frida-secondary/80 uppercase tracking-wider mt-1">
@@ -362,6 +412,15 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
           </div>
         </div>
 
+        {/* Botón de Exportar a CSV */}
+        <button
+          onClick={handleExportCSV}
+          className="mb-8 flex items-center justify-center gap-2 w-full py-3 bg-transparent border border-[#9FA1FF]/60 text-light-text dark:text-[#9FA1FF] hover:bg-[#9FA1FF]/10 font-bold rounded-2xl text-xs transition-colors duration-200"
+        >
+          <Download size={14} className="text-[#9FA1FF]" />
+          <span>Exportar Mazo (CSV)</span>
+        </button>
+
         <div className="flex items-center gap-3 w-full">
           <button
             onClick={onBack}
@@ -376,6 +435,13 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
             Comenzar sesión
           </button>
         </div>
+
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
+            <Sparkles size={16} className="text-frida-primary" />
+            <span>{toastMessage}</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -575,6 +641,12 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
           </div>
         )}
       </div>
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
+          <Sparkles size={16} className="text-frida-primary" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

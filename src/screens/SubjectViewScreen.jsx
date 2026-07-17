@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, FolderOpen, X, Settings, Flame } from 'lucide-react';
+import { ArrowLeft, Plus, FolderOpen, X, Settings, Flame, Download, Sparkles } from 'lucide-react';
 import DeckList from '../components/DeckList';
 import { getSubjectSummary } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
+import Papa from 'papaparse';
 
 export default function SubjectViewScreen({
   subject,
@@ -19,10 +20,58 @@ export default function SubjectViewScreen({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
   
   const displayStreak = getDisplayStreak({ streakCount, lastStudyDate });
 
   const stats = getSubjectSummary(subject, new Date());
+
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  const handleExportDeck = async (deck) => {
+    if (!deck.cards || deck.cards.length === 0) {
+      triggerToast('El mazo no tiene tarjetas para exportar.');
+      return;
+    }
+
+    try {
+      const data = deck.cards.map(c => ({
+        Pregunta: c.front || '',
+        Respuesta: c.back || ''
+      }));
+
+      const csvContent = Papa.unparse(data, {
+        quotes: true,
+        newline: '\r\n'
+      });
+
+      const defaultFilename = `${deck.name.toLowerCase().replace(/[^a-z0-9]/gi, '_')}_exportado.csv`;
+
+      let saved = false;
+      if (window.electronAPI?.exportDeckToCSV) {
+        saved = await window.electronAPI.exportDeckToCSV(defaultFilename, csvContent);
+      } else {
+        const dataStr = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csvContent);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", defaultFilename);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        saved = true;
+      }
+
+      if (saved) {
+        triggerToast('¡Mazo exportado con éxito!');
+      }
+    } catch (err) {
+      console.error('Error al exportar mazo:', err);
+      triggerToast('Error al exportar el mazo.');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -130,6 +179,7 @@ export default function SubjectViewScreen({
           onAddCard={onAddCard}
           onDeleteDeck={onDeleteDeck}
           onOpenCSVImporter={onOpenCSVImporter}
+          onExportDeck={handleExportDeck}
         />
       </div>
 
@@ -180,6 +230,14 @@ export default function SubjectViewScreen({
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
+          <Sparkles size={16} className="text-frida-primary" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

@@ -1,12 +1,12 @@
 import React from 'react';
-import { BookOpen, PlusCircle, Trash2, Layers, Upload } from 'lucide-react';
+import { BookOpen, PlusCircle, Trash2, Layers, Upload, Download } from 'lucide-react';
 import { getPrioritizedQueue, isCardDue as isCardDueHelper } from '../utils/fridaStore';
 
 export function isCardDue(card) {
   return isCardDueHelper(card, new Date());
 }
 
-export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOpenCSVImporter }) {
+export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOpenCSVImporter, onExportDeck }) {
   if (decks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted shadow-sm animate-fade-in transition-colors duration-300">
@@ -86,6 +86,14 @@ export default function DeckList({ decks, onStudy, onAddCard, onDeleteDeck, onOp
                   title="Importar desde CSV"
                 >
                   <Upload size={20} />
+                </button>
+
+                <button
+                  onClick={() => onExportDeck && onExportDeck(deck)}
+                  className="p-2.5 text-frida-primary hover:bg-frida-primary/10 rounded-xl transition-all duration-200"
+                  title="Exportar a CSV"
+                >
+                  <Download size={20} />
                 </button>
 
                 <button

@@ -4,5 +4,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getStore: () => ipcRenderer.invoke('get-store'),
   saveStore: (data) => ipcRenderer.invoke('save-store', data),
   loadData: () => ipcRenderer.invoke('get-store'),
-  saveData: (data) => ipcRenderer.invoke('save-store', data)
+  saveData: (data) => ipcRenderer.invoke('save-store', data),
+  exportDeckToCSV: (defaultFilename, csvContent) => ipcRenderer.invoke('export-deck-to-csv', defaultFilename, csvContent)
 });

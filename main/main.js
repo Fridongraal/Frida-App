@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs').promises;
 const { getStore, saveStore } = require('./storage');
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
@@ -42,6 +43,24 @@ app.whenReady().then(() => {
   ipcMain.handle('save-store', (_event, data) => saveStore(data));
   ipcMain.handle('load-data', () => getStore());
   ipcMain.handle('save-data', (_event, data) => saveStore(data));
+  ipcMain.handle('export-deck-to-csv', async (_event, defaultFilename, csvContent) => {
+    try {
+      const { filePath, canceled } = await dialog.showSaveDialog({
+        title: 'Exportar mazo a CSV',
+        defaultPath: defaultFilename,
+        filters: [{ name: 'Archivos CSV', extensions: ['csv'] }]
+      });
+
+      if (!canceled && filePath) {
+        await fs.writeFile(filePath, csvContent, 'utf8');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error al exportar a CSV:', error);
+      return false;
+    }
+  });
 
   createWindow();
 
