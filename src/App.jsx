@@ -156,7 +156,11 @@ export default function App() {
           <SettingsScreen
             store={store}
             saveStore={saveStore}
-            onClearData={() => saveStore({ subjects: [], soundEnabled: store.soundEnabled })}
+            onClearData={() => {
+              saveStore({ subjects: [], soundEnabled: store.soundEnabled });
+              setSelectedSubjectId(null);
+              setSelectedDeckId(null);
+            }}
             onBack={() => {
               if (selectedSubjectId) {
                 setCurrentScreen('subject');
