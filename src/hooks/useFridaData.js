@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { applyStudyAction } from '../utils/fridaReview';
 import { processCardReviewStreak } from '../utils/streakManager';
+import { setSoundEnabled } from '../utils/soundManager';
 import {
   addCardToDeck,
   addDeckToSubject,
@@ -40,10 +41,14 @@ export function useFridaData() {
       try {
         if (window.electronAPI?.getStore) {
           const nextStore = await window.electronAPI.getStore();
-          setStore(normalizeStore(nextStore));
+          const normalized = normalizeStore(nextStore);
+          setStore(normalized);
+          setSoundEnabled(normalized.soundEnabled);
         } else {
           const local = localStorage.getItem('frida-data');
-          setStore(normalizeStore(local ? JSON.parse(local) : createEmptyStore()));
+          const normalized = normalizeStore(local ? JSON.parse(local) : createEmptyStore());
+          setStore(normalized);
+          setSoundEnabled(normalized.soundEnabled);
         }
       } catch (error) {
         console.error('Error loading Frida store:', error);
@@ -59,6 +64,7 @@ export function useFridaData() {
   const persistStore = async (nextStore) => {
     const normalized = normalizeStore(nextStore);
     setStore(normalized);
+    setSoundEnabled(normalized.soundEnabled);
 
     try {
       if (window.electronAPI?.saveStore) {

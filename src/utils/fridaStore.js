@@ -21,7 +21,8 @@ export function createEmptyStore() {
     streakCount: 0,
     lastStudyDate: null,
     todayCardsCount: 0,
-    lastActiveDate: null
+    lastActiveDate: null,
+    soundEnabled: true
   };
 }
 
@@ -74,6 +75,7 @@ export function normalizeStore(raw) {
   const lastStudyDate = typeof source.lastStudyDate === 'string' ? source.lastStudyDate : null;
   const todayCardsCount = typeof source.todayCardsCount === 'number' ? source.todayCardsCount : 0;
   const lastActiveDate = typeof source.lastActiveDate === 'string' ? source.lastActiveDate : null;
+  const soundEnabled = typeof source.soundEnabled === 'boolean' ? source.soundEnabled : true;
 
   let subjects = [];
 
@@ -109,7 +111,8 @@ export function normalizeStore(raw) {
     streakCount,
     lastStudyDate,
     todayCardsCount,
-    lastActiveDate
+    lastActiveDate,
+    soundEnabled
   };
 }
 

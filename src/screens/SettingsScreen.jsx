@@ -1,11 +1,29 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Sun, Moon, Trash2, Download, ShieldAlert, Check, Sparkles, Settings } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Trash2, Download, ShieldAlert, Check, Sparkles, Settings, Volume2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { playSuccess } from '../utils/soundManager';
 
-export default function SettingsScreen({ store, onClearData, onBack }) {
+export default function SettingsScreen({ store, saveStore, onClearData, onBack }) {
   const { theme, setTheme } = useTheme();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const soundEnabled = store.soundEnabled !== false;
+
+  const handleToggleSound = () => {
+    const nextVal = !soundEnabled;
+    if (saveStore) {
+      saveStore({
+        ...store,
+        soundEnabled: nextVal
+      });
+    }
+    if (nextVal) {
+      setTimeout(() => {
+        playSuccess();
+      }, 50);
+    }
+  };
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -105,6 +123,39 @@ export default function SettingsScreen({ store, onClearData, onBack }) {
               <Moon size={28} className={theme === 'dark' ? 'text-frida-primary' : 'text-warmgray-450'} />
               <span className="text-sm font-bold mt-3">Modo Oscuro</span>
               <span className="text-[10px] text-warmgray-455 mt-1">Relajante y profundo</span>
+            </button>
+          </div>
+        </section>
+
+        {/* SECCIÓN AUDIO */}
+        <section className="bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-lavender-950/40 p-6 shadow-sm transition-all duration-300">
+          <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-1 flex items-center gap-2">
+            <Volume2 size={20} className="text-frida-primary" />
+            <span>Audio</span>
+          </h2>
+          <p className="text-xs text-warmgray-450 mb-6">
+            Controla los efectos de sonido y la retroalimentación auditiva de la aplicación.
+          </p>
+
+          <div className="flex items-center justify-between p-4 bg-frida-secondary/10 dark:bg-frida-primary/5 border border-frida-primary/15 dark:border-lavender-950/30 rounded-2xl">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-bold text-light-text dark:text-dark-text">Efectos de sonido de la app</span>
+              <span className="text-xs text-warmgray-455">Sonidos sutiles al responder y completar mazos.</span>
+            </div>
+            
+            {/* Toggle Switch */}
+            <button
+              onClick={handleToggleSound}
+              aria-label="Alternar efectos de sonido"
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                soundEnabled ? 'bg-[#9FA1FF]' : 'bg-warmgray-250 dark:bg-lavender-950/60'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                  soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
             </button>
           </div>
         </section>

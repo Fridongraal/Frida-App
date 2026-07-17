@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Flashcard from './Flashcard';
 import confetti from 'canvas-confetti';
+import { playAgain, playSuccess, playEasy, playComplete } from '../utils/soundManager';
 import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
 import { applyStudyAction, getStudyActionPreview } from '../utils/fridaReview';
@@ -117,6 +118,7 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
   useEffect(() => {
     if (sessionCompleted) {
+      playComplete();
       const colors = ['#9FA1FF', '#AEE2FF', '#FFFFFF', '#B5BAFF'];
       confetti({
         particleCount: 50,
@@ -220,6 +222,10 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
   const handleRate = useCallback((quality) => {
     if (!currentCard || !deck) return;
+
+    if (quality === 1) playAgain();
+    else if (quality === 2) playSuccess();
+    else if (quality === 3) playEasy();
 
     const cardId = currentCard.id;
     const sessionState = sessionStates[cardId] || {

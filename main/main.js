@@ -5,6 +5,9 @@ const { getStore, saveStore } = require('./storage');
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 function createWindow() {
+  const iconName = process.platform === 'win32' ? 'icon.ico' : (process.platform === 'darwin' ? 'icon.icns' : 'icon.png');
+  const iconPath = path.join(__dirname, '../assets', iconName);
+
   const mainWindow = new BrowserWindow({
     width: 1024,
     height: 768,
@@ -12,6 +15,7 @@ function createWindow() {
     minHeight: 650,
     titleBarStyle: 'default',
     autoHideMenuBar: true,
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
