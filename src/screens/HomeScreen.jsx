@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload, Trash2, Flame } from 'lucide-react';
+import { FolderPlus, Layers, X, ChevronRight, AlertCircle, Settings, Upload, Trash2, Flame, TrendingUp } from 'lucide-react';
 import { getSubjectSummary } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
 
-export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenCSVImporter, onDeleteSubject, streakCount, lastStudyDate }) {
+export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSubject, onOpenSettings, onOpenStats, onOpenCSVImporter, onDeleteSubject, streakCount, lastStudyDate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [subjectToDelete, setSubjectToDelete] = useState(null);
@@ -33,7 +33,7 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
               MVP
             </span>
           </h1>
-          <p className="text-sm text-warmgray-450 dark:text-warmgray-450 mt-1">
+          <p className="text-sm text-warmgray-455 dark:text-warmgray-455 mt-1">
             Organiza tus mazos por materia y estudia con un flujo más claro.
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
             className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl border transition-all duration-300 shadow-sm ${
               displayStreak.active
                 ? 'bg-orange-500/15 dark:bg-orange-500/10 border-orange-500/30 text-orange-500 animate-pulse'
-                : 'bg-warmgray-50/50 dark:bg-dark-muted/20 border-warmgray-200 dark:border-dark-muted text-warmgray-400 dark:text-warmgray-450 opacity-60'
+                : 'bg-warmgray-50/50 dark:bg-dark-muted/20 border-warmgray-200 dark:border-dark-muted text-warmgray-400 dark:text-warmgray-455 opacity-60'
             }`}
             title={
               displayStreak.active
@@ -57,6 +57,14 @@ export default function HomeScreen({ subjects, decks, onCreateSubject, onOpenSub
             <Flame size={18} fill={displayStreak.active ? "currentColor" : "none"} className={displayStreak.active ? "text-orange-500 animate-bounce" : ""} />
             <span className="text-sm font-extrabold">{displayStreak.count}</span>
           </div>
+
+          <button
+            onClick={onOpenStats}
+            className="p-3 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-300 dark:hover:text-frida-primary hover:bg-frida-primary/10 dark:hover:bg-frida-primary/20 rounded-2xl transition-all duration-200"
+            title="Estadísticas"
+          >
+            <TrendingUp size={20} />
+          </button>
 
           <button
             onClick={onOpenSettings}

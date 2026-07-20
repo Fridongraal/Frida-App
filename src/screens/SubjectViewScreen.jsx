@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, FolderOpen, X, Settings, Flame, Download, Sparkles } from 'lucide-react';
+import { ArrowLeft, Plus, FolderOpen, X, Settings, Flame, Download, Sparkles, TrendingUp } from 'lucide-react';
 import DeckList from '../components/DeckList';
 import { getSubjectSummary } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
@@ -14,6 +14,7 @@ export default function SubjectViewScreen({
   onAddCard,
   onBack,
   onOpenSettings,
+  onOpenStats,
   onOpenCSVImporter,
   streakCount,
   lastStudyDate,
@@ -125,6 +126,14 @@ export default function SubjectViewScreen({
             <Flame size={18} fill={displayStreak.active ? "currentColor" : "none"} className={displayStreak.active ? "text-orange-500 animate-bounce" : ""} />
             <span className="text-sm font-extrabold">{displayStreak.count}</span>
           </div>
+
+          <button
+            onClick={onOpenStats}
+            className="p-3 text-warmgray-455 hover:text-frida-primary dark:text-warmgray-300 dark:hover:text-frida-primary hover:bg-frida-primary/10 dark:hover:bg-frida-primary/20 rounded-2xl transition-all duration-200"
+            title="Estadísticas"
+          >
+            <TrendingUp size={20} />
+          </button>
 
           <button
             onClick={onOpenSettings}

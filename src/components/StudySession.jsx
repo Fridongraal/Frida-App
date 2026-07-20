@@ -300,7 +300,10 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
     }));
 
     if (outcome.persistAlgorithm) {
-      onReviewCard(deck.id, cardId, outcome.persistAlgorithm);
+      onReviewCard(deck.id, cardId, outcome.persistAlgorithm, {
+        rating: quality,
+        isNew: currentCard.algorithm?.repetitions === 0
+      });
     }
 
     pulseShortcut(String(quality));

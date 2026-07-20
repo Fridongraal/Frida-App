@@ -5,6 +5,7 @@ import SubjectViewScreen from './screens/SubjectViewScreen';
 import CreateCardScreen from './screens/CreateCardScreen';
 import StudyScreen from './screens/StudyScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import StatsScreen from './screens/StatsScreen';
 import CSVImporter from './components/CSVImporter';
 import { Sparkles } from 'lucide-react';
 
@@ -26,9 +27,10 @@ export default function App() {
     streakCount,
     lastStudyDate,
     todayCardsCount,
-    lastActiveDate
+    lastActiveDate,
+    reviewHistory
   } = useFridaData();
-  const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study', 'settings'
+  const [currentScreen, setCurrentScreen] = useState('home'); // 'home', 'subject', 'create-card', 'study', 'settings', 'stats'
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
   const [selectedDeckId, setSelectedDeckId] = useState(null);
   const [isCSVImporterOpen, setIsCSVImporterOpen] = useState(false);
@@ -107,6 +109,7 @@ export default function App() {
             onCreateSubject={addSubject}
             onOpenSubject={navigateToSubject}
             onOpenSettings={() => setCurrentScreen('settings')}
+            onOpenStats={() => setCurrentScreen('stats')}
             onOpenCSVImporter={() => handleOpenCSVImporter(null)}
             onDeleteSubject={deleteSubject}
             streakCount={streakCount}
@@ -124,6 +127,7 @@ export default function App() {
             onAddCard={navigateToCreateCard}
             onBack={navigateToHome}
             onOpenSettings={() => setCurrentScreen('settings')}
+            onOpenStats={() => setCurrentScreen('stats')}
             onOpenCSVImporter={(deckId) => handleOpenCSVImporter(deckId)}
             streakCount={streakCount}
             lastStudyDate={lastStudyDate}
@@ -161,6 +165,20 @@ export default function App() {
               setSelectedSubjectId(null);
               setSelectedDeckId(null);
             }}
+            onBack={() => {
+              if (selectedSubjectId) {
+                setCurrentScreen('subject');
+              } else {
+                navigateToHome();
+              }
+            }}
+          />
+        )}
+
+        {currentScreen === 'stats' && (
+          <StatsScreen
+            decks={decks}
+            reviewHistory={reviewHistory}
             onBack={() => {
               if (selectedSubjectId) {
                 setCurrentScreen('subject');

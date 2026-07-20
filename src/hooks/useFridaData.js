@@ -95,7 +95,7 @@ export function useFridaData() {
     persistStore(nextStore);
   };
 
-  const reviewCard = (deckId, cardId, quality) => {
+  const reviewCard = (deckId, cardId, quality, historyMeta) => {
     const location = findDeckLocation(store, deckId);
     if (!location) return;
 
@@ -117,7 +117,30 @@ export function useFridaData() {
       nextReviewDate: persistAlgorithm.nextReviewDate,
     });
 
-    const storeWithStreak = processCardReviewStreak(nextStore);
+    // Record review in history
+    const localDate = new Date();
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    const newHistoryEntry = {
+      date: dateString,
+      deckId,
+      cardId,
+      rating: historyMeta?.rating || 2, // 1: Otra vez, 2: Bien, 3: Fácil
+      isNew: historyMeta?.isNew ?? (card.algorithm?.repetitions === 0)
+    };
+
+    const currentHistory = Array.isArray(nextStore.reviewHistory) ? nextStore.reviewHistory : [];
+    const updatedHistory = [...currentHistory, newHistoryEntry];
+    
+    const storeWithHistory = {
+      ...nextStore,
+      reviewHistory: updatedHistory
+    };
+
+    const storeWithStreak = processCardReviewStreak(storeWithHistory);
     persistStore(storeWithStreak);
   };
 
@@ -163,5 +186,6 @@ export function useFridaData() {
     lastStudyDate: store.lastStudyDate || null,
     todayCardsCount: store.todayCardsCount || 0,
     lastActiveDate: store.lastActiveDate || null,
+    reviewHistory: store.reviewHistory || []
   };
 }
