@@ -2,6 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg: #F7F8FF;
+  --color-card: #FFFFFF;
+  --color-accent: #9FA1FF;
+  --color-text: #1C1B2E;
+  --color-secondary: #B5BAFF;
+  --color-accent-light: #AEE2FF;
+  --color-muted: #E2E8F0;
+}
+
+[data-theme="light"] {
+  --color-bg: #F7F8FF;
+  --color-card: #FFFFFF;
+  --color-accent: #9FA1FF;
+  --color-text: #1C1B2E;
+  --color-secondary: #B5BAFF;
+  --color-accent-light: #AEE2FF;
+  --color-muted: #E2E8F0;
+}
+
+[data-theme="dark"] {
+  --color-bg: #070824;
+  --color-card: #10123b;
+  --color-accent: #9FA1FF;
+  --color-text: #F0F1FF;
+  --color-secondary: #B5BAFF;
+  --color-accent-light: #AEE2FF;
+  --color-muted: #1c245c;
+}
+
+/* 1. Atardecer en la Playa */
+[data-theme="atardecer-playa"] {
+  --color-bg: #CFEBFF;
+  --color-card: #FFFCE1;
+  --color-accent: #FFBE91;
+  --color-text: #4A3E3D;
+  --color-secondary: #FFDDB0;
+  --color-accent-light: #FFDDB0;
+  --color-muted: #E5E7EB;
+}
+
+/* 2. Lavanda Nocturno */
+[data-theme="lavanda-nocturno"] {
+  --color-bg: #424874;
+  --color-card: #A6B1E1;
+  --color-accent: #F4EEFF;
+  --color-text: #1E2238;
+  --color-secondary: #DCD6F7;
+  --color-accent-light: #F4EEFF;
+  --color-muted: #8E9BCB;
+}
+
+/* 3. Menta Glacial */
+[data-theme="menta-glacial"] {
+  --color-bg: #E3FDFD;
+  --color-card: #CBF1F5;
+  --color-accent: #71C9CE;
+  --color-text: #2B4F52;
+  --color-secondary: #A6E3E9;
+  --color-accent-light: #A6E3E9;
+  --color-muted: #95D5D8;
+}
+
+/* 4. Puesta de Sol Cyberpunk */
+[data-theme="sunset-cyberpunk"] {
+  --color-bg: #6A2C70;
+  --color-card: #B83B5E;
+  --color-accent: #F9ED69;
+  --color-text: #FFFBF2;
+  --color-secondary: #F08A5D;
+  --color-accent-light: #F9ED69;
+  --color-muted: #E84545;
+}
+
+/* 5. Bosque Matcha */
+[data-theme="bosque-matcha"] {
+  --color-bg: #40513B;
+  --color-card: #609966;
+  --color-accent: #EDF1D6;
+  --color-text: #1A2218;
+  --color-secondary: #9DC08B;
+  --color-accent-light: #EDF1D6;
+  --color-muted: #507D54;
+}
+
+/* 6. Código Drácula */
+[data-theme="codigo-dracula"] {
+  --color-bg: #2B2E4A;
+  --color-card: #53354A;
+  --color-accent: #E84545;
+  --color-text: #FFF5F5;
+  --color-secondary: #903749;
+  --color-accent-light: #FF8A8A;
+  --color-muted: #903749;
+}
+
+/* 7. Modo Hacker Puro */
+[data-theme="hacker-puro"] {
+  --color-bg: #000000;
+  --color-card: #3D0000;
+  --color-accent: #FF0000;
+  --color-text: #FFFFFF;
+  --color-secondary: #950101;
+  --color-accent-light: #FF5555;
+  --color-muted: #950101;
+}
+
+/* 8. Oficina Nórdica */
+[data-theme="oficina-nordica"] {
+  --color-bg: #F0F5F9;
+  --color-card: #C9D6DF;
+  --color-accent: #1E2022;
+  --color-text: #1E2022;
+  --color-secondary: #52616B;
+  --color-accent-light: #52616B;
+  --color-muted: #C9D6DF;
+}
+
+/* 9. Neon Cyber-Purple */
+[data-theme="cyber-purple"] {
+  --color-bg: #000000;
+  --color-card: #52057B;
+  --color-accent: #BC6FF1;
+  --color-text: #FFFFFF;
+  --color-secondary: #892CDC;
+  --color-accent-light: #BC6FF1;
+  --color-muted: #892CDC;
+}
+
+/* 10. Profundidades del Océano */
+[data-theme="profundo-oceano"] {
+  --color-bg: #070F2B;
+  --color-card: #1B1A55;
+  --color-accent: #9290C3;
+  --color-text: #F0F4FF;
+  --color-secondary: #535C91;
+  --color-accent-light: #9290C3;
+  --color-muted: #535C91;
+}
+
 @layer base {
   /* Scrollbar styles to match the premium lavender theme */
   ::-webkit-scrollbar {

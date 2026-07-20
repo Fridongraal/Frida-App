@@ -2,11 +2,26 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
+export const THEMES = [
+  'light',
+  'dark',
+  'atardecer-playa',
+  'lavanda-nocturno',
+  'menta-glacial',
+  'sunset-cyberpunk',
+  'bosque-matcha',
+  'codigo-dracula',
+  'hacker-puro',
+  'oficina-nordica',
+  'cyber-purple',
+  'profundo-oceano'
+];
+
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     // Intentar leer de localStorage o usar preferencia del sistema (por defecto light)
     const storedTheme = localStorage.getItem('frida-theme');
-    if (storedTheme) {
+    if (storedTheme && THEMES.includes(storedTheme)) {
       return storedTheme;
     }
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -15,20 +30,37 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
+    root.setAttribute('data-theme', theme);
+    
+    // Check if selected theme is dark-oriented to maintain compatibility with dark: classes
+    const darkOriented = [
+      'dark', 
+      'sunset-cyberpunk', 
+      'bosque-matcha',
+      'codigo-dracula',
+      'hacker-puro',
+      'cyber-purple',
+      'profundo-oceano'
+    ].includes(theme);
+    if (darkOriented) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
+    
     localStorage.setItem('frida-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => {
+      const idx = THEMES.indexOf(prevTheme);
+      const nextIdx = (idx + 1) % THEMES.length;
+      return THEMES[nextIdx];
+    });
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, THEMES }}>
       {children}
     </ThemeContext.Provider>
   );

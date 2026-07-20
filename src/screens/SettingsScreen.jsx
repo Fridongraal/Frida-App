@@ -86,44 +86,47 @@ export default function SettingsScreen({ store, saveStore, onClearData, onBack }
             Elige el aspecto visual que mejor se adapte a tu entorno de estudio.
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Opción Claro */}
-            <button
-              onClick={() => setTheme('light')}
-              className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
-                theme === 'light'
-                  ? 'border-frida-primary bg-frida-secondary/20 text-light-text shadow-sm font-bold'
-                  : 'border-frida-primary/15 dark:border-lavender-950/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5 text-warmgray-450'
-              }`}
-            >
-              {theme === 'light' && (
-                <span className="absolute top-3 right-3 bg-frida-primary text-light-text rounded-full p-0.5">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-              )}
-              <Sun size={28} className={theme === 'light' ? 'text-frida-primary' : 'text-warmgray-450'} />
-              <span className="text-sm font-bold mt-3">Modo Claro</span>
-              <span className="text-[10px] text-warmgray-450 mt-1">Luminoso y limpio</span>
-            </button>
-
-            {/* Opción Oscuro */}
-            <button
-              onClick={() => setTheme('dark')}
-              className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all duration-300 relative ${
-                theme === 'dark'
-                  ? 'border-frida-primary bg-frida-primary/20 text-dark-text shadow-sm font-bold'
-                  : 'border-frida-primary/15 dark:border-lavender-950/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5 text-warmgray-450'
-              }`}
-            >
-              {theme === 'dark' && (
-                <span className="absolute top-3 right-3 bg-frida-primary text-light-text rounded-full p-0.5">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-              )}
-              <Moon size={28} className={theme === 'dark' ? 'text-frida-primary' : 'text-warmgray-450'} />
-              <span className="text-sm font-bold mt-3">Modo Oscuro</span>
-              <span className="text-[10px] text-warmgray-455 mt-1">Relajante y profundo</span>
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              { id: 'light', name: 'Atómico Claro', desc: 'Luminoso y limpio', bg: '#F7F8FF', card: '#FFFFFF', accent: '#9FA1FF', text: '#1C1B2E' },
+              { id: 'dark', name: 'Atómico Oscuro', desc: 'Relajante y profundo', bg: '#070824', card: '#10123b', accent: '#9FA1FF', text: '#F0F1FF' },
+              { id: 'atardecer-playa', name: 'Atardecer en la Playa', desc: 'Tonos cálidos y playeros', bg: '#CFEBFF', card: '#FFFCE1', accent: '#FFBE91', text: '#4A3E3D' },
+              { id: 'lavanda-nocturno', name: 'Lavanda Nocturno', desc: 'Misterioso y relajante', bg: '#424874', card: '#A6B1E1', accent: '#F4EEFF', text: '#1E2238' },
+              { id: 'menta-glacial', name: 'Menta Glacial', desc: 'Fresco e invernal', bg: '#E3FDFD', card: '#CBF1F5', accent: '#71C9CE', text: '#2B4F52' },
+              { id: 'sunset-cyberpunk', name: 'Puesta de Sol Cyberpunk', desc: 'Vibrante y tecnológico', bg: '#6A2C70', card: '#B83B5E', accent: '#F9ED69', text: '#FFFBF2' },
+              { id: 'bosque-matcha', name: 'Bosque Matcha', desc: 'Natural y orgánico', bg: '#40513B', card: '#609966', accent: '#EDF1D6', text: '#1A2218' },
+              { id: 'codigo-dracula', name: 'Código Drácula', desc: 'Estética gótica de código', bg: '#2B2E4A', card: '#53354A', accent: '#E84545', text: '#FFF5F5' },
+              { id: 'hacker-puro', name: 'Modo Hacker Puro', desc: 'Contraste negro y rojo terminal', bg: '#000000', card: '#3D0000', accent: '#FF0000', text: '#FFFFFF' },
+              { id: 'oficina-nordica', name: 'Oficina Nórdica', desc: 'Minimalismo escandinavo', bg: '#F0F5F9', card: '#C9D6DF', accent: '#1E2022', text: '#1E2022' },
+              { id: 'cyber-purple', name: 'Neon Cyber-Purple', desc: 'Oscuridad con acentos neón', bg: '#000000', card: '#52057B', accent: '#BC6FF1', text: '#FFFFFF' },
+              { id: 'profundo-oceano', name: 'Profundidades del Océano', desc: 'Azules abisales profundos', bg: '#070F2B', card: '#1B1A55', accent: '#9290C3', text: '#F0F4FF' }
+            ].map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setTheme(opt.id)}
+                className={`flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 relative text-left ${
+                  theme === opt.id
+                    ? 'border-frida-primary bg-frida-secondary/20 shadow-md font-bold'
+                    : 'border-frida-primary/15 dark:border-lavender-950/40 hover:bg-frida-secondary/10 dark:hover:bg-frida-primary/5 text-warmgray-450'
+                }`}
+              >
+                {theme === opt.id && (
+                  <span className="absolute top-3 right-3 bg-frida-primary text-light-text rounded-full p-0.5 z-10">
+                    <Check size={12} strokeWidth={3} />
+                  </span>
+                )}
+                <span className="text-sm font-bold text-light-text dark:text-dark-text">{opt.name}</span>
+                <span className="text-[10px] text-warmgray-450 dark:text-warmgray-400 mt-0.5 line-clamp-1">{opt.desc}</span>
+                
+                {/* Visual Palette Representation */}
+                <div className="flex gap-1.5 mt-4 w-full">
+                  <div className="w-4 h-4 rounded-full border border-frida-primary/20 shadow-sm" style={{ backgroundColor: opt.bg }} title="Fondo" />
+                  <div className="w-4 h-4 rounded-full border border-frida-primary/20 shadow-sm" style={{ backgroundColor: opt.card }} title="Tarjetas" />
+                  <div className="w-4 h-4 rounded-full border border-frida-primary/20 shadow-sm" style={{ backgroundColor: opt.accent }} title="Acento" />
+                  <div className="w-4 h-4 rounded-full border border-frida-primary/20 shadow-sm" style={{ backgroundColor: opt.text }} title="Texto" />
+                </div>
+              </button>
+            ))}
           </div>
         </section>
 
