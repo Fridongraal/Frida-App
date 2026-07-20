@@ -10,7 +10,8 @@
     "dev": "concurrently -k -r \"npm run dev:frontend\" \"electron .\"",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
@@ -31,11 +32,22 @@
     "vitest": "^3.0.7"
   },
   "build": {
+    "appId": "com.fridongraal.frida",
+    "productName": "Frida",
     "directories": {
-      "output": "dist"
+      "output": "dist-electron"
     },
+    "files": [
+      "dist/**/*",
+      "main/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
     "win": {
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis"
+      ]
     },
     "mac": {
       "icon": "assets/icon.icns"
