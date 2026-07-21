@@ -13,6 +13,7 @@ import {
   findDeckLocation,
   normalizeStore,
   updateCardAlgorithm,
+  updateCardContent,
   importCardsToDeck,
 } from '../utils/fridaStore';
 
@@ -163,6 +164,13 @@ export function useFridaData() {
     persistStore(deleteDeckFromSubject(store, location.subject.id, deckId));
   };
 
+  const updateCard = (deckId, cardId, { front, back }) => {
+    const location = findDeckLocation(store, deckId);
+    if (!location) return;
+
+    persistStore(updateCardContent(store, location.subject.id, deckId, cardId, { front, back }));
+  };
+
   const deleteCard = (deckId, cardId) => {
     const location = findDeckLocation(store, deckId);
     if (!location) return;
@@ -185,6 +193,7 @@ export function useFridaData() {
       persistStore(importCardsToDeck(store, subjectId, deckId, cards)),
     updateCardAlgorithm: (subjectId, deckId, cardId, updatedAlgorithm) =>
       persistStore(updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlgorithm)),
+    updateCard,
     reviewCard,
     deleteDeck,
     deleteCard,

@@ -11,6 +11,10 @@ import {
   LogOut,
   Flame,
   Download,
+  Pencil,
+  Trash2,
+  Save,
+  X,
 } from 'lucide-react';
 import Flashcard from './Flashcard';
 import confetti from 'canvas-confetti';
@@ -106,7 +110,16 @@ function FeedbackButton({ tone, label, shortcut, icon: Icon, active, onClick }) 
   );
 }
 
-export default function StudySession({ deck, onReviewCard, onBack, streakCount, lastStudyDate, todayCardsCount }) {
+export default function StudySession({
+  deck,
+  onReviewCard,
+  onUpdateCard,
+  onDeleteCard,
+  onBack,
+  streakCount,
+  lastStudyDate,
+  todayCardsCount,
+}) {
   const [dueCards, setDueCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -121,6 +134,12 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
   const [isSavingAndExiting, setIsSavingAndExiting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+  // Estados para Edición Rápida In-Line
+  const [isEditingCard, setIsEditingCard] = useState(false);
+  const [editFront, setEditFront] = useState('');
+  const [editBack, setEditBack] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const triggerToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3000);
@@ -133,14 +152,14 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
     }
 
     try {
-      const data = deck.cards.map(c => ({
+      const data = deck.cards.map((c) => ({
         Pregunta: c.front || '',
-        Respuesta: c.back || ''
+        Respuesta: c.back || '',
       }));
 
       const csvContent = Papa.unparse(data, {
         quotes: true,
-        newline: '\r\n'
+        newline: '\r\n',
       });
 
       const defaultFilename = `${deck.name.toLowerCase().replace(/[^a-z0-9]/gi, '_')}_exportado.csv`;
@@ -149,10 +168,10 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
       if (window.electronAPI?.exportDeckToCSV) {
         saved = await window.electronAPI.exportDeckToCSV(defaultFilename, csvContent);
       } else {
-        const dataStr = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csvContent);
+        const dataStr = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csvContent);
         const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", defaultFilename);
+        downloadAnchor.setAttribute('href', dataStr);
+        downloadAnchor.setAttribute('download', defaultFilename);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -183,14 +202,14 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
         angle: 60,
         spread: 55,
         origin: { x: 0, y: 0.8 },
-        colors: colors
+        colors: colors,
       });
       confetti({
         particleCount: 50,
         angle: 120,
         spread: 55,
         origin: { x: 1, y: 0.8 },
-        colors: colors
+        colors: colors,
       });
     }
   }, [sessionCompleted]);
@@ -219,7 +238,10 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
     lastDeckIdRef.current = deck.id;
 
-    const { queue, strictlyDueCount, dueCardsCount, newCardsCount } = getPrioritizedQueue(deck, new Date());
+    const { queue, strictlyDueCount, dueCardsCount, newCardsCount } = getPrioritizedQueue(
+      deck,
+      new Date()
+    );
 
     setCounts({
       newCount: newCardsCount,
@@ -251,6 +273,74 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
       }
     : null;
 
+  // Manejadores de Edición Rápida In-Line
+  const handleOpenEdit = useCallback((cardToEdit) => {
+    if (!cardToEdit) return;
+    setEditFront(cardToEdit.front || '');
+    setEditBack(cardToEdit.back || '');
+    setShowDeleteConfirm(false);
+    setIsEditingCard(true);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setIsEditingCard(false);
+    setShowDeleteConfirm(false);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!currentCard) return;
+
+    const trimmedFront = editFront.trim();
+    const trimmedBack = editBack.trim();
+
+    if (!trimmedFront || !trimmedBack) {
+      triggerToast('La pregunta y respuesta no pueden estar vacías.');
+      return;
+    }
+
+    if (onUpdateCard) {
+      onUpdateCard(deck.id, currentCard.id, { front: trimmedFront, back: trimmedBack });
+    }
+
+    setDueCards((prev) =>
+      prev.map((c) => (c.id === currentCard.id ? { ...c, front: trimmedFront, back: trimmedBack } : c))
+    );
+
+    handleCloseEdit();
+    triggerToast('¡Tarjeta actualizada en tiempo real!');
+  }, [currentCard, deck, editBack, editFront, handleCloseEdit, onUpdateCard]);
+
+  const handleDeleteCard = useCallback(() => {
+    if (!currentCard) return;
+
+    const targetCardId = currentCard.id;
+
+    if (onDeleteCard) {
+      onDeleteCard(deck.id, targetCardId);
+    }
+
+    setDueCards((prev) => {
+      const next = prev.filter((c) => c.id !== targetCardId);
+      if (next.length === 0 || currentIndex >= next.length) {
+        if (started && next.length === 0) {
+          setSessionCompleted(true);
+        }
+      }
+      return next;
+    });
+
+    setSessionStates((prev) => {
+      const next = { ...prev };
+      delete next[targetCardId];
+      return next;
+    });
+
+    setStrictlyDueCount((prev) => Math.max(0, prev - 1));
+
+    handleCloseEdit();
+    triggerToast('Tarjeta eliminada del mazo.');
+  }, [currentIndex, currentCard, deck, handleCloseEdit, onDeleteCard, started]);
+
   const pulseShortcut = useCallback((shortcut) => {
     setActiveShortcut(shortcut);
     if (activeShortcutTimerRef.current) {
@@ -261,73 +351,88 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
     }, 140);
   }, []);
 
-  const queueCurrentCard = useCallback((mode) => {
-    if (!currentCard) return;
+  const queueCurrentCard = useCallback(
+    (mode) => {
+      if (!currentCard) return;
 
-    setDueCards((prevQueue) => {
-      const nextQueue = [...prevQueue];
+      setDueCards((prevQueue) => {
+        const nextQueue = [...prevQueue];
 
-      if (mode === 'short') {
-        const insertIndex = Math.min(currentIndex + 3, nextQueue.length);
-        nextQueue.splice(insertIndex, 0, currentCard);
-      } else if (mode === 'end') {
-        nextQueue.push(currentCard);
+        if (mode === 'short') {
+          const insertIndex = Math.min(currentIndex + 3, nextQueue.length);
+          nextQueue.splice(insertIndex, 0, currentCard);
+        } else if (mode === 'end') {
+          nextQueue.push(currentCard);
+        }
+
+        return nextQueue;
+      });
+    },
+    [currentCard, currentIndex]
+  );
+
+  const handleRate = useCallback(
+    (quality) => {
+      if (!currentCard || !deck) return;
+
+      if (quality === 1) playAgain();
+      else if (quality === 2) playSuccess();
+      else if (quality === 3) playEasy();
+
+      const cardId = currentCard.id;
+      const sessionState = sessionStates[cardId] || {
+        workingAlgorithm: currentCard.algorithm,
+      };
+
+      const outcome = applyStudyAction(currentCardView || currentCard, quality, sessionState);
+
+      setStats((prev) => {
+        if (quality === 1) return { ...prev, dificil: prev.dificil + 1 };
+        if (quality === 2) return { ...prev, bien: prev.bien + 1 };
+        return { ...prev, facil: prev.facil + 1 };
+      });
+
+      setSessionStates((prev) => ({
+        ...prev,
+        [cardId]: {
+          workingAlgorithm: outcome.sessionAlgorithm,
+        },
+      }));
+
+      if (outcome.persistAlgorithm) {
+        onReviewCard(deck.id, cardId, outcome.persistAlgorithm, {
+          rating: quality,
+          isNew: currentCard.algorithm?.state === 'new' || currentCard.algorithm?.repetitions === 0,
+        });
       }
 
-      return nextQueue;
-    });
-  }, [currentCard, currentIndex]);
+      pulseShortcut(String(quality));
+      setIsFlipped(false);
 
-  const handleRate = useCallback((quality) => {
-    if (!currentCard || !deck) return;
+      if (outcome.requeueMode !== 'none') {
+        queueCurrentCard(outcome.requeueMode);
+      }
 
-    if (quality === 1) playAgain();
-    else if (quality === 2) playSuccess();
-    else if (quality === 3) playEasy();
-
-    const cardId = currentCard.id;
-    const sessionState = sessionStates[cardId] || {
-      awaitingGraduation: false,
-      workingAlgorithm: currentCard.algorithm,
-    };
-
-    const outcome = applyStudyAction(currentCardView || currentCard, quality, sessionState);
-
-    setStats((prev) => {
-      if (quality === 1) return { ...prev, dificil: prev.dificil + 1 };
-      if (quality === 2) return { ...prev, bien: prev.bien + 1 };
-      return { ...prev, facil: prev.facil + 1 };
-    });
-
-    setSessionStates((prev) => ({
-      ...prev,
-      [cardId]: {
-        awaitingGraduation: outcome.awaitingGraduation,
-        workingAlgorithm: outcome.sessionAlgorithm,
-      },
-    }));
-
-    if (outcome.persistAlgorithm) {
-      onReviewCard(deck.id, cardId, outcome.persistAlgorithm, {
-        rating: quality,
-        isNew: currentCard.algorithm?.repetitions === 0
-      });
-    }
-
-    pulseShortcut(String(quality));
-    setIsFlipped(false);
-
-    if (outcome.requeueMode !== 'none') {
-      queueCurrentCard(outcome.requeueMode);
-    }
-
-    window.setTimeout(() => {
-      setCurrentIndex((prev) => prev + 1);
-    }, 180);
-  }, [currentCard, currentCardView, deck, onReviewCard, pulseShortcut, queueCurrentCard, sessionStates]);
+      window.setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+      }, 180);
+    },
+    [currentCard, currentCardView, deck, onReviewCard, pulseShortcut, queueCurrentCard, sessionStates]
+  );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (isEditingCard) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleCloseEdit();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          handleSaveEdit();
+        }
+        return;
+      }
+
       if (sessionCompleted || !started) return;
 
       if (!isFlipped && e.code === 'Space') {
@@ -336,6 +441,14 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
         setIsFlipped(true);
         flippedAtRef.current = Date.now();
         return;
+      }
+
+      if (e.key === 'e' || e.key === 'E') {
+        if (currentCard) {
+          e.preventDefault();
+          handleOpenEdit(currentCardView || currentCard);
+          return;
+        }
       }
 
       if (!isFlipped) return;
@@ -357,158 +470,178 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleRate, isFlipped, pulseShortcut, sessionCompleted, started]);
+  }, [
+    currentCard,
+    currentCardView,
+    handleCloseEdit,
+    handleOpenEdit,
+    handleRate,
+    handleSaveEdit,
+    isEditingCard,
+    isFlipped,
+    pulseShortcut,
+    sessionCompleted,
+    started,
+  ]);
 
-  if (isSavingAndExiting) {
+  if (!started && deck && deck.cards) {
+    const totalInDeck = deck.cards.length;
+
     return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
-        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mb-6 animate-pulse">
-          <CheckCircle2 size={32} />
-        </div>
-        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">Progreso guardado</h2>
-        <p className="text-warmgray-455 dark:text-warmgray-450 text-sm">
-          Saliendo de la sesión de estudio...
-        </p>
-      </div>
-    );
-  }
-
-  if (!hadCardsToStudy) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in">
-        <div className="w-16 h-16 bg-frida-secondary/15 dark:bg-frida-primary/10 text-frida-primary rounded-2xl flex items-center justify-center mb-6">
-          <Layers size={32} />
-        </div>
-        <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2">El mazo está vacío</h2>
-        <p className="text-warmgray-450 dark:text-warmgray-450 max-w-sm mb-8 text-sm">
-          Añade o importa algunas tarjetas para poder comenzar a estudiar en este mazo.
-        </p>
-        <button
-          onClick={onBack}
-          className="px-6 py-3 bg-frida-primary hover:bg-frida-primary/90 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/25 text-sm"
-        >
-          Volver
-        </button>
-      </div>
-    );
-  }
-
-  if (!started && !sessionCompleted) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-lg mx-auto text-center h-[70vh] text-light-text dark:text-dark-text animate-fade-in relative">
-        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">{deck.name}</h2>
-        <p className="text-sm text-warmgray-455 dark:text-warmgray-450 mb-8 max-w-md">
-          Estás por comenzar tu sesión de estudio. Revisa el estado de tus tarjetas a continuación:
-        </p>
-
-        {strictlyDueCount === 0 && (
-          <p className="text-xs font-semibold text-frida-primary dark:text-frida-secondary mb-6 bg-frida-secondary/15 px-4 py-2.5 rounded-2xl">
-            ✨ Estás al día con este mazo. Al comenzar, repasarás tarjetas futuras de forma adelantada.
-          </p>
-        )}
-
-        <div className="grid grid-cols-2 gap-4 w-full mb-6">
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-secondary/80 dark:bg-frida-secondary/20 border border-frida-primary/30 dark:border-dark-muted rounded-2xl">
-            <span className="text-2xl font-bold text-light-text dark:text-frida-secondary">{counts.newCount}</span>
-            <span className="text-[10px] font-bold text-light-text/75 dark:text-frida-secondary/80 uppercase tracking-wider mt-1">
-              Nuevas
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center justify-center p-4 bg-frida-success/80 dark:bg-frida-success/20 border border-frida-success/30 dark:border-dark-muted rounded-2xl">
-            <span className="text-2xl font-bold text-green-900 dark:text-green-300">{counts.reviewCount}</span>
-            <span className="text-[10px] font-bold text-green-950/75 dark:text-green-400 uppercase tracking-wider mt-1">
-              Repaso
-            </span>
-          </div>
-        </div>
-
-        {/* Botón de Exportar a CSV */}
-        <button
-          onClick={handleExportCSV}
-          className="mb-8 flex items-center justify-center gap-2 w-full py-3 bg-transparent border border-[#9FA1FF]/60 text-light-text dark:text-[#9FA1FF] hover:bg-[#9FA1FF]/10 font-bold rounded-2xl text-xs transition-colors duration-200"
-        >
-          <Download size={14} className="text-[#9FA1FF]" />
-          <span>Exportar Mazo (CSV)</span>
-        </button>
-
-        <div className="flex items-center gap-3 w-full">
+      <div className="flex flex-col items-center justify-between h-full w-full max-w-xl mx-auto px-4 py-4 text-light-text dark:text-dark-text animate-fade-in overflow-y-auto">
+        <div className="w-full flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex-1 py-3.5 bg-light-card dark:bg-dark-card hover:bg-frida-secondary/15 dark:hover:bg-dark-muted/20 text-warmgray-455 dark:text-warmgray-400 border border-frida-primary/20 dark:border-dark-muted font-bold rounded-2xl transition-colors duration-200 text-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-frida-secondary/15 dark:bg-dark-muted/30 hover:bg-frida-primary hover:text-light-text dark:hover:bg-frida-primary text-frida-primary dark:text-dark-text border border-frida-primary/20 rounded-xl transition-all duration-200 text-xs font-bold shadow-sm"
           >
-            Volver
+            <ChevronLeft size={16} />
+            <span>Volver</span>
           </button>
-          <button
-            onClick={() => setStarted(true)}
-            className="w-2/3 py-3.5 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-2xl transition-colors duration-200 shadow-sm shadow-frida-secondary/20 text-sm"
-          >
-            Comenzar sesión
-          </button>
+          <span className="text-xs font-extrabold bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary dark:text-dark-muted px-3.5 py-1 rounded-full border border-frida-primary/20 dark:border-dark-muted">
+            {deck.name}
+          </span>
         </div>
 
-        {toastMessage && (
-          <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
-            <Sparkles size={16} className="text-frida-primary" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (sessionCompleted) {
-    const totalEstudiadas = stats.dificil + stats.bien + stats.facil;
-
-    return (
-      <div className="flex flex-col items-center justify-center p-8 max-w-md mx-auto text-center h-[70vh] animate-fade-in text-light-text dark:text-dark-text">
-        <div className="w-20 h-20 bg-frida-secondary/20 dark:bg-frida-primary/10 text-frida-primary rounded-3xl flex items-center justify-center mb-6 shadow-sm">
-          <Sparkles size={40} className="text-frida-primary" />
-        </div>
-        <h2 className="text-3xl font-extrabold text-light-text dark:text-dark-text mb-2">¡Mazo completado!</h2>
-        <p className="text-warmgray-450 dark:text-warmgray-400 mb-6 text-sm">
-          Has repasado la totalidad de las tarjetas en este mazo.
-        </p>
-
-        {totalEstudiadas > 0 && (
-          <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/15 dark:border-dark-muted p-5 mb-8 shadow-sm transition-colors duration-300">
-            <h3 className="text-sm font-semibold text-frida-primary dark:text-dark-muted mb-4 uppercase tracking-wider">
-              Resumen de respuestas
-            </h3>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              <div className="p-3 bg-red-50/60 dark:bg-red-950/20 rounded-2xl">
-                <span className="block text-xl font-bold text-red-500 dark:text-red-400">{stats.dificil}</span>
-                <span className="text-[10px] font-semibold text-red-400 dark:text-red-500 uppercase">Otra vez</span>
-              </div>
-              <div className="p-3 bg-frida-secondary/20 dark:bg-frida-primary/10 rounded-2xl">
-                <span className="block text-xl font-bold text-frida-primary dark:text-frida-secondary">{stats.bien}</span>
-                <span className="text-[10px] font-semibold text-frida-primary dark:text-frida-secondary uppercase">Bien</span>
-              </div>
-              <div className="p-3 bg-frida-accent/20 dark:bg-frida-accent/10 rounded-2xl">
-                <span className="block text-xl font-bold text-sky-600 dark:text-frida-accent">{stats.facil}</span>
-                <span className="text-[10px] font-semibold text-sky-650 dark:text-sky-350 uppercase">Fácil</span>
+        <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl p-6 border border-frida-primary/15 dark:border-dark-muted shadow-sm my-auto flex flex-col gap-5">
+          <div className="flex items-center justify-between border-b border-frida-primary/10 dark:border-dark-muted/40 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-frida-secondary/20 dark:bg-frida-primary/15 text-frida-primary border border-frida-primary/20">
+                <Layers size={24} />
+              </span>
+              <div>
+                <h2 className="text-xl font-extrabold text-light-text dark:text-dark-text tracking-tight">
+                  {deck.name}
+                </h2>
+                <p className="text-xs text-warmgray-450 dark:text-warmgray-400 font-semibold">
+                  Resumen de la sesión de estudio
+                </p>
               </div>
             </div>
 
-            {/* Daily Streak Flame / Milestone Info */}
-            {todayCardsCount >= 5 ? (
-              <div className="mt-2 p-3 bg-orange-500/10 border border-orange-500/25 rounded-2xl flex items-center justify-center gap-2 text-orange-500 font-extrabold text-xs animate-pulse">
-                <Flame size={16} fill="currentColor" className="animate-bounce" />
-                <span>¡Racha diaria mantenida! Racha de {displayStreak.count} día{displayStreak.count === 1 ? '' : 's'} 🔥</span>
-              </div>
-            ) : (
-              <div className="mt-2 p-3 bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 rounded-2xl flex flex-col items-center gap-1.5">
-                <div className="flex items-center gap-1.5 text-frida-primary font-bold text-xs">
-                  <Flame size={14} />
-                  <span>Meta diaria: {todayCardsCount} de 5 tarjetas</span>
-                </div>
-                <p className="text-[10px] text-warmgray-450 dark:text-warmgray-400">
-                  ¡Estudia {5 - todayCardsCount} tarjetas más hoy para mantener tu racha!
-                </p>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              title="Exportar mazo a CSV"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-frida-secondary/15 dark:bg-dark-muted/30 hover:bg-frida-primary hover:text-light-text dark:hover:bg-frida-primary text-frida-primary dark:text-dark-text border border-frida-primary/20 dark:border-dark-muted rounded-xl transition-all text-xs font-bold shadow-sm"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">Exportar CSV</span>
+            </button>
           </div>
-        )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-lavender-100/60 dark:bg-lavender-950/20 p-4 rounded-2xl border border-lavender-200/50 dark:border-lavender-900/30 flex flex-col justify-between">
+              <span className="text-xs font-bold text-lavender-700 dark:text-lavender-300">Nuevas</span>
+              <span className="text-2xl font-black text-lavender-700 dark:text-lavender-300 mt-1">
+                {counts.newCount}
+              </span>
+            </div>
+
+            <div className="bg-sky-50/70 dark:bg-sky-950/20 p-4 rounded-2xl border border-sky-100 dark:border-sky-900/30 flex flex-col justify-between">
+              <span className="text-xs font-bold text-sky-700 dark:text-sky-300">Repaso</span>
+              <span className="text-2xl font-black text-sky-700 dark:text-sky-300 mt-1">
+                {counts.reviewCount}
+              </span>
+            </div>
+          </div>
+
+          {strictlyDueCount > 0 ? (
+            <div className="p-3.5 bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 rounded-2xl text-xs text-frida-primary dark:text-frida-secondary font-bold flex items-center gap-2">
+              <Sparkles size={16} className="shrink-0" />
+              <span>Tienes {strictlyDueCount} tarjeta(s) prioritarias para repasar hoy.</span>
+            </div>
+          ) : (
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-2">
+              <Sparkles size={16} className="shrink-0" />
+              <span>No tienes repasos estrictos pendientes. Puedes adelantar repasos futuros.</span>
+            </div>
+          )}
+
+          <button
+            onClick={() => setStarted(true)}
+            disabled={totalInDeck === 0}
+            className="w-full py-4 bg-frida-primary hover:bg-frida-primary/95 active:scale-[0.98] disabled:opacity-50 text-light-text font-extrabold text-base rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-frida-secondary/30"
+          >
+            <Sparkles size={20} className="text-light-text" />
+            <span>{totalInDeck === 0 ? 'Sin tarjetas para estudiar' : 'Comenzar repaso'}</span>
+          </button>
+        </div>
+
+        <div className="w-full text-center text-xs text-warmgray-450 dark:text-warmgray-400 font-medium">
+          Total de tarjetas en el mazo: <span className="font-bold">{totalInDeck}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionCompleted || dueCards.length === 0) {
+    const totalRated = stats.dificil + stats.bien + stats.facil;
+
+    return (
+      <div className="flex flex-col items-center justify-between h-full w-full max-w-xl mx-auto px-4 py-4 text-light-text dark:text-dark-text animate-fade-in overflow-y-auto">
+        <div className="w-full flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-3 py-1.5 bg-frida-secondary/15 dark:bg-dark-muted/30 hover:bg-frida-primary hover:text-light-text dark:hover:bg-frida-primary text-frida-primary dark:text-dark-text border border-frida-primary/20 rounded-xl transition-all duration-200 text-xs font-bold shadow-sm"
+          >
+            <ChevronLeft size={16} />
+            <span>Volver</span>
+          </button>
+        </div>
+
+        <div className="w-full bg-light-card dark:bg-dark-card rounded-3xl p-6 border border-frida-primary/15 dark:border-dark-muted shadow-sm my-auto flex flex-col items-center text-center gap-4">
+          <div className="w-16 h-16 bg-frida-secondary/20 dark:bg-frida-primary/20 text-frida-primary rounded-full flex items-center justify-center mb-1">
+            <CheckCircle2 size={36} />
+          </div>
+
+          <h2 className="text-2xl font-extrabold text-light-text dark:text-dark-text tracking-tight">
+            ¡Sesión completada!
+          </h2>
+
+          <p className="text-xs text-warmgray-450 dark:text-warmgray-400 font-medium -mt-2 max-w-sm">
+            Has repasado todas las tarjetas del mazo de hoy. ¡Excelente trabajo manteniendo tu hábito!
+          </p>
+
+          <div className="w-full grid grid-cols-3 gap-2 my-2">
+            <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-2xl">
+              <div className="text-xs font-bold text-red-500">Otra vez</div>
+              <div className="text-xl font-black text-red-600 dark:text-red-400 mt-1">
+                {stats.dificil}
+              </div>
+            </div>
+            <div className="p-3 bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 rounded-2xl">
+              <div className="text-xs font-bold text-frida-primary">Bien</div>
+              <div className="text-xl font-black text-frida-primary dark:text-frida-secondary mt-1">
+                {stats.bien}
+              </div>
+            </div>
+            <div className="p-3 bg-frida-accent/15 dark:bg-frida-accent/20 border border-frida-accent/30 rounded-2xl">
+              <div className="text-xs font-bold text-frida-accent dark:text-frida-accent">Fácil</div>
+              <div className="text-xl font-black text-frida-accent dark:text-frida-accent mt-1">
+                {stats.facil}
+              </div>
+            </div>
+          </div>
+
+          {todayCardsCount >= 5 ? (
+            <div className="mt-2 p-3 bg-orange-500/10 border border-orange-500/25 rounded-2xl flex items-center justify-center gap-2 text-orange-500 font-extrabold text-xs animate-pulse w-full">
+              <Flame size={16} fill="currentColor" className="animate-bounce" />
+              <span>
+                ¡Racha diaria mantenida! Racha de {displayStreak.count} día{displayStreak.count === 1 ? '' : 's'} 🔥
+              </span>
+            </div>
+          ) : (
+            <div className="mt-2 p-3 bg-frida-secondary/15 dark:bg-frida-primary/10 border border-frida-primary/20 rounded-2xl flex flex-col items-center gap-1.5 w-full">
+              <div className="flex items-center gap-1.5 text-frida-primary font-bold text-xs">
+                <Flame size={14} />
+                <span>Meta diaria: {todayCardsCount} de 5 tarjetas</span>
+              </div>
+              <p className="text-[10px] text-warmgray-450 dark:text-warmgray-400">
+                ¡Estudia {5 - todayCardsCount} tarjetas más hoy para mantener tu racha!
+              </p>
+            </div>
+          )}
+        </div>
 
         <button
           onClick={onBack}
@@ -521,13 +654,18 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
   }
 
   const progressPercent = dueCards.length > 0 ? (currentIndex / dueCards.length) * 100 : 0;
-  const againPreview = currentCardView ? getStudyActionPreview(currentCardView, 1, currentSessionState || {}) : { label: '<1m' };
-  const actionPreview = currentCardView ? getStudyActionPreview(currentCardView, 2, currentSessionState || {}) : { label: '<10m' };
-  const easyPreview = currentCardView ? getStudyActionPreview(currentCardView, 3, currentSessionState || {}) : { label: '4d' };
-  const isShortLearning = Boolean(currentCardView?.algorithm?.state === 'learning' || currentCardView?.algorithm?.state === 'relearning');
+  const againPreview = currentCardView
+    ? getStudyActionPreview(currentCardView, 1, currentSessionState || {})
+    : { label: '<1m' };
+  const actionPreview = currentCardView
+    ? getStudyActionPreview(currentCardView, 2, currentSessionState || {})
+    : { label: '<10m' };
+  const easyPreview = currentCardView
+    ? getStudyActionPreview(currentCardView, 3, currentSessionState || {})
+    : { label: '4d' };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-xl mx-auto px-4 py-4 justify-between text-light-text dark:text-dark-text overflow-y-auto">
+    <div className="flex flex-col h-full w-full max-w-xl mx-auto px-4 py-4 justify-between text-light-text dark:text-dark-text overflow-y-auto relative">
       <div className="w-full flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <button
@@ -540,7 +678,11 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
           <div className="flex items-center gap-2">
             {currentCardView && (
-              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getCardCategoryInfo(currentCardView).classes}`}>
+              <span
+                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                  getCardCategoryInfo(currentCardView).classes
+                }`}
+              >
                 {getCardCategoryInfo(currentCardView).label}
               </span>
             )}
@@ -567,7 +709,9 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
 
         {strictlyDueCount > 0 && currentIndex >= strictlyDueCount && (
           <div className="w-full bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 text-green-800 dark:text-green-300 px-4 py-2.5 rounded-2xl text-xs font-bold text-center shadow-sm flex items-center justify-center gap-2 mb-2 animate-bounce">
-            <span>🎉🎉 ¡Completaste las tarjetas programadas para hoy! Puedes salir o continuar repasando el resto del mazo.</span>
+            <span>
+              🎉🎉 ¡Completaste las tarjetas programadas para hoy! Puedes salir o continuar repasando el resto del mazo.
+            </span>
           </div>
         )}
 
@@ -579,7 +723,7 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
       </div>
 
       <div className="flex-1 w-full flex items-center justify-center my-6">
-         {currentCardView && (
+        {currentCardView && (
           <Flashcard
             card={currentCardView}
             isFlipped={isFlipped}
@@ -593,11 +737,12 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
                 return next;
               });
             }}
+            onEdit={handleOpenEdit}
           />
         )}
       </div>
 
-        <div className="mt-4 min-h-[120px] w-full flex flex-col justify-center">
+      <div className="mt-4 min-h-[120px] w-full flex flex-col justify-center">
         {!isFlipped ? (
           <button
             onClick={() => {
@@ -653,6 +798,125 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
           </div>
         )}
       </div>
+
+      {/* MODAL DE EDICIÓN RÁPIDA IN-LINE */}
+      {isEditingCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg bg-light-card dark:bg-dark-card border border-frida-primary/30 dark:border-dark-muted rounded-3xl p-6 shadow-2xl flex flex-col gap-4 animate-slide-up text-light-text dark:text-dark-text">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-frida-primary/10 dark:border-dark-muted/40 pb-3">
+              <div className="flex items-center gap-2.5 text-frida-primary">
+                <span className="p-2 bg-frida-secondary/20 dark:bg-frida-primary/15 rounded-xl">
+                  <Pencil size={18} />
+                </span>
+                <div>
+                  <h3 className="text-base font-extrabold tracking-tight">Edición Rápida</h3>
+                  <p className="text-[11px] text-warmgray-450 dark:text-warmgray-400 font-medium">
+                    Actualiza la tarjeta sin perder el progreso de tu sesión.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseEdit}
+                className="p-1.5 rounded-xl text-warmgray-450 dark:text-warmgray-400 hover:bg-gray-100 dark:hover:bg-dark-muted/50 transition-colors"
+                title="Cancelar (Esc)"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Form inputs */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-frida-primary flex items-center gap-1.5 uppercase tracking-wider">
+                  <span>Pregunta (Frente)</span>
+                </label>
+                <textarea
+                  value={editFront}
+                  onChange={(e) => setEditFront(e.target.value)}
+                  placeholder="Escribe la pregunta..."
+                  rows={3}
+                  className="w-full p-3.5 bg-light-bg dark:bg-dark-bg border border-frida-primary/20 dark:border-dark-muted rounded-2xl text-sm font-medium text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-frida-primary/40 transition-all resize-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-frida-primary flex items-center gap-1.5 uppercase tracking-wider">
+                  <span>Respuesta (Reverso)</span>
+                </label>
+                <textarea
+                  value={editBack}
+                  onChange={(e) => setEditBack(e.target.value)}
+                  placeholder="Escribe la respuesta..."
+                  rows={4}
+                  className="w-full p-3.5 bg-light-bg dark:bg-dark-bg border border-frida-primary/20 dark:border-dark-muted rounded-2xl text-sm font-medium text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-frida-primary/40 transition-all resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Confirm Delete Banner */}
+            {showDeleteConfirm ? (
+              <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl flex flex-col gap-2 animate-fade-in">
+                <p className="text-xs font-extrabold text-red-600 dark:text-red-400 text-center">
+                  ⚠️ ¿Seguro que deseas eliminar esta tarjeta del mazo permanentemente?
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteCard}
+                    className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                  >
+                    Sí, eliminar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-1.5 bg-gray-200 dark:bg-dark-muted text-warmgray-450 dark:text-dark-text rounded-xl text-xs font-bold transition-all"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-frida-primary/10 dark:border-dark-muted/40">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-3 py-2 bg-red-50 dark:bg-red-950/30 hover:bg-red-500 hover:text-white border border-red-200 dark:border-red-800/60 text-red-500 dark:text-red-400 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5"
+                title="Eliminar tarjeta del mazo"
+              >
+                <Trash2 size={14} />
+                <span>Eliminar</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseEdit}
+                  className="px-4 py-2 bg-gray-100 dark:bg-dark-muted/40 text-warmgray-450 dark:text-dark-text hover:bg-gray-200 dark:hover:bg-dark-muted rounded-xl text-xs font-bold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEdit}
+                  className="px-5 py-2 bg-frida-primary hover:bg-frida-primary/95 text-light-text font-extrabold rounded-xl text-xs shadow-md transition-all flex items-center gap-1.5 shadow-frida-secondary/25"
+                >
+                  <Save size={14} />
+                  <span>Guardar Cambios</span>
+                  <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-bold bg-white/20 rounded">
+                    Ctrl+Enter
+                  </kbd>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toastMessage && (
         <div className="fixed bottom-6 right-6 bg-light-card text-light-text dark:bg-dark-card dark:text-dark-text px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-slide-up z-50 text-sm font-semibold border border-frida-primary/30">
           <Sparkles size={16} className="text-frida-primary" />

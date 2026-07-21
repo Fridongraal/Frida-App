@@ -290,6 +290,37 @@ export function updateCardAlgorithm(store, subjectId, deckId, cardId, updatedAlg
   };
 }
 
+export function updateCardContent(store, subjectId, deckId, cardId, { front, back }) {
+  const normalized = normalizeStore(store);
+
+  return {
+    ...normalized,
+    subjects: normalized.subjects.map((subject) => {
+      if (subject.id !== subjectId) return subject;
+
+      return {
+        ...subject,
+        decks: subject.decks.map((deck) => {
+          if (deck.id !== deckId) return deck;
+
+          return {
+            ...deck,
+            cards: deck.cards.map((card) => {
+              if (card.id !== cardId) return card;
+
+              return {
+                ...card,
+                front: typeof front === 'string' ? front : card.front,
+                back: typeof back === 'string' ? back : card.back,
+              };
+            }),
+          };
+        }),
+      };
+    }),
+  };
+}
+
 export function deleteSubject(store, subjectId) {
   const normalized = normalizeStore(store);
 

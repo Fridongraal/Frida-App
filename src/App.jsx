@@ -21,6 +21,7 @@ export default function App() {
     addCardToDeck,
     importCards,
     reviewCard,
+    updateCard,
     deleteCard,
     deleteSubject,
     saveStore,
@@ -149,6 +150,8 @@ export default function App() {
           <StudyScreen
             deck={selectedDeck}
             onReviewCard={reviewCard}
+            onUpdateCard={updateCard}
+            onDeleteCard={deleteCard}
             onBack={navigateBackFromDetail}
             streakCount={streakCount}
             lastStudyDate={lastStudyDate}
