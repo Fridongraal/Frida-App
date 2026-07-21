@@ -6,12 +6,49 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function createDefaultAlgorithm(algorithm = {}) {
+export function createDefaultAlgorithm(algorithm = {}) {
+  const reps = Number.isFinite(algorithm.repetitions)
+    ? algorithm.repetitions
+    : Number.isFinite(algorithm.reps)
+    ? algorithm.reps
+    : 0;
+
+  const interval = Number.isFinite(algorithm.interval) ? algorithm.interval : 0;
+  const learningStep = Number.isFinite(algorithm.learningStep)
+    ? algorithm.learningStep
+    : Number.isFinite(algorithm.learning_step)
+    ? algorithm.learning_step
+    : 0;
+  const lapses = Number.isFinite(algorithm.lapses) ? algorithm.lapses : 0;
+
+  let easeInput = algorithm.easeFactor ?? algorithm.ease_factor ?? 2500;
+  if (typeof easeInput === 'number' && easeInput < 100) {
+    easeInput = Math.round(easeInput * 1000);
+  }
+  const easeFactor = Number.isFinite(easeInput) ? Math.max(1300, Math.round(easeInput)) : 2500;
+
+  const due = algorithm.due || algorithm.nextReviewDate || nowIso();
+
+  let state = algorithm.state;
+  if (!state || !['new', 'learning', 'review', 'relearning'].includes(state)) {
+    if (reps === 0 && interval === 0 && learningStep === 0) {
+      state = 'new';
+    } else if (interval < 1) {
+      state = 'learning';
+    } else {
+      state = 'review';
+    }
+  }
+
   return {
-    interval: Number.isFinite(algorithm.interval) ? algorithm.interval : 1,
-    easeFactor: Number.isFinite(algorithm.easeFactor) ? algorithm.easeFactor : 2.5,
-    repetitions: Number.isFinite(algorithm.repetitions) ? algorithm.repetitions : 0,
-    nextReviewDate: algorithm.nextReviewDate || nowIso(),
+    state,
+    easeFactor,
+    interval,
+    learningStep,
+    lapses,
+    repetitions: reps,
+    due,
+    nextReviewDate: due,
   };
 }
 
@@ -314,7 +351,9 @@ export function findDeckLocation(store, deckId) {
 
 export function isCardDue(card, asOf = new Date()) {
   const cutoff = asOf instanceof Date ? asOf.getTime() : new Date(asOf).getTime();
-  const nextReviewDate = card?.algorithm?.nextReviewDate || card?.nextReviewDate;
+  const alg = createDefaultAlgorithm(card?.algorithm || card);
+  if (alg.state === 'new') return true;
+  const nextReviewDate = alg.due || alg.nextReviewDate;
   if (!nextReviewDate) return false;
   return new Date(nextReviewDate).getTime() <= cutoff;
 }
@@ -332,8 +371,9 @@ export function getPendingCounts(store, asOf = new Date()) {
       let deckTotal = 0;
 
       for (const card of deck.cards) {
-        const reviewDate = card?.algorithm?.nextReviewDate || card?.nextReviewDate;
-        if (reviewDate && new Date(reviewDate).getTime() <= cutoff) {
+        const alg = createDefaultAlgorithm(card.algorithm || card);
+        const reviewDate = alg.due || alg.nextReviewDate;
+        if (alg.state === 'new' || (reviewDate && new Date(reviewDate).getTime() <= cutoff)) {
           deckTotal += 1;
         }
       }
@@ -364,18 +404,20 @@ export function filterCards(deck, asOf = new Date()) {
   const newCards = [];
   const learningCards = [];
   const reviewCards = [];
+  const relearningCards = [];
 
   for (const card of cards) {
-    const reps = card.algorithm?.repetitions ?? card.repetitions ?? 0;
-    const interval = card.algorithm?.interval ?? card.interval ?? 1;
-    const nextReviewDate = card.algorithm?.nextReviewDate || card.nextReviewDate;
+    const alg = createDefaultAlgorithm(card.algorithm || card);
+    const reviewTime = new Date(alg.due || alg.nextReviewDate || 0).getTime();
 
-    if (reps === 0) {
+    if (alg.state === 'new') {
       newCards.push(card);
-    } else if (interval < 1) {
-      learningCards.push(card);
-    } else if (nextReviewDate && new Date(nextReviewDate).getTime() <= cutoff) {
-      reviewCards.push(card);
+    } else if (alg.state === 'learning') {
+      if (reviewTime <= cutoff) learningCards.push(card);
+    } else if (alg.state === 'relearning') {
+      if (reviewTime <= cutoff) relearningCards.push(card);
+    } else if (alg.state === 'review') {
+      if (reviewTime <= cutoff) reviewCards.push(card);
     }
   }
 
@@ -383,7 +425,8 @@ export function filterCards(deck, asOf = new Date()) {
     newCards,
     learningCards,
     reviewCards,
-    total: newCards.length + learningCards.length + reviewCards.length
+    relearningCards,
+    total: newCards.length + learningCards.length + reviewCards.length + relearningCards.length
   };
 }
 
@@ -399,17 +442,23 @@ export function getPrioritizedQueue(deck, asOf = new Date()) {
   const cutoff = asOf instanceof Date ? asOf.getTime() : new Date(asOf).getTime();
 
   const dueCards = [];
+  const learningCards = [];
   const newCards = [];
   const futureCards = [];
 
   for (const card of cards) {
-    const reps = card.algorithm?.repetitions ?? card.repetitions ?? 0;
-    const nextReviewDate = card.algorithm?.nextReviewDate || card.nextReviewDate;
+    const alg = createDefaultAlgorithm(card.algorithm || card);
+    const reviewTime = new Date(alg.due || alg.nextReviewDate || 0).getTime();
 
-    if (reps === 0) {
+    if (alg.state === 'new') {
       newCards.push(card);
-    } else {
-      const reviewTime = nextReviewDate ? new Date(nextReviewDate).getTime() : 0;
+    } else if (alg.state === 'learning' || alg.state === 'relearning') {
+      if (reviewTime <= cutoff) {
+        learningCards.push(card);
+      } else {
+        futureCards.push(card);
+      }
+    } else if (alg.state === 'review') {
       if (reviewTime <= cutoff) {
         dueCards.push(card);
       } else {
@@ -420,29 +469,27 @@ export function getPrioritizedQueue(deck, asOf = new Date()) {
 
   // Sort dueCards: smaller interval first, then smaller easeFactor
   dueCards.sort((a, b) => {
-    const intA = a.algorithm?.interval ?? a.interval ?? 1;
-    const intB = b.algorithm?.interval ?? b.interval ?? 1;
-    if (intA !== intB) return intA - intB;
-
-    const easeA = a.algorithm?.easeFactor ?? a.easeFactor ?? 2.5;
-    const easeB = b.algorithm?.easeFactor ?? b.easeFactor ?? 2.5;
-    return easeA - easeB;
+    const algA = createDefaultAlgorithm(a.algorithm || a);
+    const algB = createDefaultAlgorithm(b.algorithm || b);
+    if (algA.interval !== algB.interval) return algA.interval - algB.interval;
+    return algA.easeFactor - algB.easeFactor;
   });
 
   // Sort futureCards: closest date first
   futureCards.sort((a, b) => {
-    const dateA = new Date(a.algorithm?.nextReviewDate || a.nextReviewDate || 0).getTime();
-    const dateB = new Date(b.algorithm?.nextReviewDate || b.nextReviewDate || 0).getTime();
+    const dateA = new Date(a.algorithm?.due || a.algorithm?.nextReviewDate || 0).getTime();
+    const dateB = new Date(b.algorithm?.due || b.algorithm?.nextReviewDate || 0).getTime();
     return dateA - dateB;
   });
 
-  const queue = [...dueCards, ...newCards, ...futureCards];
-  const strictlyDueCount = dueCards.length + newCards.length;
+  const queue = [...learningCards, ...dueCards, ...newCards, ...futureCards];
+  const strictlyDueCount = learningCards.length + dueCards.length + newCards.length;
 
   return {
     queue,
     strictlyDueCount,
     dueCardsCount: dueCards.length,
+    learningCardsCount: learningCards.length,
     newCardsCount: newCards.length,
     futureCardsCount: futureCards.length
   };

@@ -18,18 +18,13 @@ import Papa from 'papaparse';
 import { playAgain, playSuccess, playEasy, playComplete } from '../utils/soundManager';
 import { filterCards, getPrioritizedQueue } from '../utils/fridaStore';
 import { getDisplayStreak } from '../utils/streakManager';
-import { applyStudyAction, getStudyActionPreview } from '../utils/fridaReview';
+import { applyStudyAction, getStudyActionPreview, normalizeAlgorithm } from '../utils/fridaReview';
 
 function buildInitialSessionState(cards) {
   return cards.reduce((acc, card) => {
+    const alg = normalizeAlgorithm(card.algorithm || card);
     acc[card.id] = {
-      awaitingGraduation: false,
-      workingAlgorithm: {
-        interval: Number.isFinite(card.algorithm?.interval) ? card.algorithm.interval : 1,
-        easeFactor: Number.isFinite(card.algorithm?.easeFactor) ? card.algorithm.easeFactor : 2.5,
-        repetitions: Number.isFinite(card.algorithm?.repetitions) ? card.algorithm.repetitions : 0,
-        nextReviewDate: card.algorithm?.nextReviewDate,
-      },
+      workingAlgorithm: alg,
     };
     return acc;
   }, {});
@@ -38,12 +33,25 @@ function buildInitialSessionState(cards) {
 function getCardCategoryInfo(card) {
   if (!card) return { label: '', classes: '' };
 
-  const reps = card.algorithm?.repetitions ?? 0;
+  const alg = normalizeAlgorithm(card.algorithm || card);
+  const state = alg.state;
 
-  if (reps === 0) {
+  if (state === 'new') {
     return {
       label: 'Nueva',
       classes: 'bg-lavender-100 dark:bg-lavender-950/40 text-lavender-700 dark:text-lavender-300 border border-lavender-200/50 dark:border-lavender-900/50',
+    };
+  }
+  if (state === 'learning') {
+    return {
+      label: 'Aprendiendo',
+      classes: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-900/50',
+    };
+  }
+  if (state === 'relearning') {
+    return {
+      label: 'Reaprendizaje',
+      classes: 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-900/50',
     };
   }
 
@@ -513,9 +521,10 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
   }
 
   const progressPercent = dueCards.length > 0 ? (currentIndex / dueCards.length) * 100 : 0;
+  const againPreview = currentCardView ? getStudyActionPreview(currentCardView, 1, currentSessionState || {}) : { label: '<1m' };
   const actionPreview = currentCardView ? getStudyActionPreview(currentCardView, 2, currentSessionState || {}) : { label: '<10m' };
-  const easyPreview = currentCardView ? getStudyActionPreview(currentCardView, 3, currentSessionState || {}) : { label: '5d' };
-  const isShortLearning = Boolean(currentSessionState?.awaitingGraduation || currentCardView?.algorithm?.repetitions === 0);
+  const easyPreview = currentCardView ? getStudyActionPreview(currentCardView, 3, currentSessionState || {}) : { label: '4d' };
+  const isShortLearning = Boolean(currentCardView?.algorithm?.state === 'learning' || currentCardView?.algorithm?.state === 'relearning');
 
   return (
     <div className="flex flex-col h-full w-full max-w-xl mx-auto px-4 py-4 justify-between text-light-text dark:text-dark-text overflow-y-auto">
@@ -608,7 +617,7 @@ export default function StudySession({ deck, onReviewCard, onBack, streakCount, 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mx-auto animate-slide-up">
             <FeedbackButton
               tone="again"
-              label="Otra vez (<1m)"
+              label={`Otra vez (${againPreview.label})`}
               shortcut="1"
               icon={RotateCcw}
               active={activeShortcut === '1'}

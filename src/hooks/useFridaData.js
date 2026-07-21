@@ -23,10 +23,14 @@ function toFlatDecks(subjects) {
       subjectId: subject.id,
       cards: deck.cards.map((card) => ({
         ...card,
+        state: card.algorithm.state,
         interval: card.algorithm.interval,
         easeFactor: card.algorithm.easeFactor,
+        learningStep: card.algorithm.learningStep,
+        lapses: card.algorithm.lapses,
         repetitions: card.algorithm.repetitions,
-        nextReviewDate: card.algorithm.nextReviewDate,
+        due: card.algorithm.due || card.algorithm.nextReviewDate,
+        nextReviewDate: card.algorithm.nextReviewDate || card.algorithm.due,
       })),
     }))
   );
@@ -105,16 +109,20 @@ export function useFridaData() {
     if (!deck || !card) return;
 
     const persistAlgorithm = (typeof quality === 'object' && quality !== null)
-      ? (quality.persistAlgorithm ? quality.persistAlgorithm : (quality.nextReviewDate ? quality : null))
+      ? (quality.persistAlgorithm ? quality.persistAlgorithm : (quality.nextReviewDate || quality.due ? quality : null))
       : applyStudyAction(card, quality, {}).persistAlgorithm;
 
     if (!persistAlgorithm) return;
 
     const nextStore = updateCardAlgorithm(store, subject.id, deckId, cardId, {
+      state: persistAlgorithm.state,
       interval: persistAlgorithm.interval,
       easeFactor: persistAlgorithm.easeFactor,
+      learningStep: persistAlgorithm.learningStep,
+      lapses: persistAlgorithm.lapses,
       repetitions: persistAlgorithm.repetitions,
-      nextReviewDate: persistAlgorithm.nextReviewDate,
+      due: persistAlgorithm.due || persistAlgorithm.nextReviewDate,
+      nextReviewDate: persistAlgorithm.nextReviewDate || persistAlgorithm.due,
     });
 
     // Record review in history
@@ -129,7 +137,7 @@ export function useFridaData() {
       deckId,
       cardId,
       rating: historyMeta?.rating || 2, // 1: Otra vez, 2: Bien, 3: Fácil
-      isNew: historyMeta?.isNew ?? (card.algorithm?.repetitions === 0)
+      isNew: historyMeta?.isNew ?? (card.algorithm?.state === 'new' || card.algorithm?.repetitions === 0)
     };
 
     const currentHistory = Array.isArray(nextStore.reviewHistory) ? nextStore.reviewHistory : [];

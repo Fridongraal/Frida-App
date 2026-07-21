@@ -64,24 +64,38 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
   const strokeOffset = circ - (circ * effectiveness) / 100;
 
   return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto px-6 py-8 overflow-y-auto text-[#F0F1FF] bg-[#121358] transition-colors duration-300">
+    <div 
+      className="flex flex-col h-full max-w-5xl mx-auto px-6 py-8 overflow-y-auto transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--color-bg)',
+        color: 'var(--color-text)'
+      }}
+    >
       
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="p-3 text-white hover:bg-[#232F72] border border-[#2F578A]/40 rounded-2xl transition-all duration-200"
+            className="p-3 border rounded-2xl transition-all duration-200 hover:opacity-80"
+            style={{
+              color: 'var(--color-text)',
+              borderColor: 'var(--color-secondary)',
+              backgroundColor: 'var(--color-card)'
+            }}
             title="Volver"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
-              <TrendingUp className="text-[#9FA1FF]" />
+              <TrendingUp style={{ color: 'var(--color-accent)' }} />
               <span>Estadísticas de Frida</span>
             </h1>
-            <p className="text-sm text-slate-350 mt-1">
+            <p 
+              className="text-sm mt-1"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Visualiza tu rendimiento y el estado de tu progreso de estudio.
             </p>
           </div>
@@ -91,45 +105,90 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
       {/* Grid: Global Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         {/* Card 1: Learned Cards */}
-        <div className="bg-[#232F72] rounded-3xl border border-[#2F578A] p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[#9FA1FF]/40 duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-[#9FA1FF]/15 flex items-center justify-center text-[#9FA1FF]">
+        <div 
+          className="rounded-3xl border p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--color-accent)] duration-300"
+          style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-secondary)' }}
+        >
+          <div 
+            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ 
+              backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+              color: 'var(--color-accent)'
+            }}
+          >
             <Award size={24} />
           </div>
           <div>
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            <span 
+              className="text-xs font-semibold uppercase tracking-wider block"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Tarjetas Aprendidas
             </span>
-            <span className="text-3xl font-extrabold text-[#9FA1FF] mt-1 block">
+            <span 
+              className="text-3xl font-extrabold mt-1 block"
+              style={{ color: 'var(--color-accent)' }}
+            >
               {totalLearned}
             </span>
           </div>
         </div>
 
         {/* Card 2: New Cards */}
-        <div className="bg-[#232F72] rounded-3xl border border-[#2F578A] p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[#9FA1FF]/40 duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white">
+        <div 
+          className="rounded-3xl border p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--color-accent)] duration-300"
+          style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-secondary)' }}
+        >
+          <div 
+            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ 
+              backgroundColor: 'color-mix(in srgb, var(--color-text) 15%, transparent)',
+              color: 'var(--color-text)'
+            }}
+          >
             <BookOpen size={24} />
           </div>
           <div>
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            <span 
+              className="text-xs font-semibold uppercase tracking-wider block"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Tarjetas Nuevas
             </span>
-            <span className="text-3xl font-extrabold text-white mt-1 block">
+            <span 
+              className="text-3xl font-extrabold mt-1 block"
+              style={{ color: 'var(--color-text)' }}
+            >
               {totalNew}
             </span>
           </div>
         </div>
 
         {/* Card 3: Studied Today */}
-        <div className="bg-[#232F72] rounded-3xl border border-[#2F578A] p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[#9FA1FF]/40 duration-300">
-          <div className="w-12 h-12 rounded-2xl bg-[#AEE2FF]/15 flex items-center justify-center text-[#AEE2FF]">
+        <div 
+          className="rounded-3xl border p-6 shadow-xl flex items-center gap-4 transition-all hover:border-[var(--color-accent)] duration-300"
+          style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-secondary)' }}
+        >
+          <div 
+            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ 
+              backgroundColor: 'color-mix(in srgb, var(--color-secondary) 15%, transparent)',
+              color: 'var(--color-secondary)'
+            }}
+          >
             <Calendar size={24} />
           </div>
           <div>
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            <span 
+              className="text-xs font-semibold uppercase tracking-wider block"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Repasados Hoy
             </span>
-            <span className="text-3xl font-extrabold text-[#AEE2FF] mt-1 block">
+            <span 
+              className="text-3xl font-extrabold mt-1 block"
+              style={{ color: 'var(--color-secondary)' }}
+            >
               {totalStudiedToday}
             </span>
           </div>
@@ -140,18 +199,30 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         
         {/* Section A: Bar Chart - Cards Reviewed Per Day */}
-        <div className="bg-[#232F72] rounded-3xl border border-[#2F578A] p-6 shadow-xl flex flex-col justify-between min-h-[350px]">
+        <div 
+          className="rounded-3xl border p-6 shadow-xl flex flex-col justify-between min-h-[350px] transition-all hover:border-[var(--color-accent)] duration-300"
+          style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-secondary)' }}
+        >
           <div>
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <Calendar size={18} className="text-[#9FA1FF]" />
+            <h3 
+              className="text-lg font-bold mb-1 flex items-center gap-2"
+              style={{ color: 'var(--color-text)' }}
+            >
+              <Calendar size={18} style={{ color: 'var(--color-accent)' }} />
               <span>Actividad de los últimos 7 días</span>
             </h3>
-            <p className="text-xs text-slate-350">
+            <p 
+              className="text-xs"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Número de tarjetas repasadas diariamente en la última semana.
             </p>
           </div>
 
-          <div className="flex-1 flex items-end justify-between gap-3 px-4 pt-8 pb-4 h-48 border-b border-[#2F578A]/40 relative">
+          <div 
+            className="flex-1 flex items-end justify-between gap-3 px-4 pt-8 pb-4 h-48 border-b relative"
+            style={{ borderColor: 'color-mix(in srgb, var(--color-secondary) 40%, transparent)' }}
+          >
             {barData.map((data, index) => {
               const heightPercent = (data.count / maxForScale) * 85 + 5; // offset for layout
               const isHovered = hoveredBar === index;
@@ -168,16 +239,28 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
                     className="w-full rounded-t-lg transition-all duration-300 relative"
                     style={{ 
                       height: `${heightPercent}%`, 
-                      backgroundColor: isHovered ? '#B5BAFF' : '#9FA1FF',
-                      boxShadow: isHovered ? '0 0 12px rgba(159, 161, 255, 0.4)' : 'none'
+                      backgroundColor: isHovered ? 'var(--color-secondary)' : 'var(--color-accent)',
+                      boxShadow: isHovered ? '0 0 12px color-mix(in srgb, var(--color-accent) 40%, transparent)' : 'none'
                     }}
                   />
                   
                   {/* Tooltip */}
                   {isHovered && (
-                    <div className="absolute bottom-full mb-2 bg-[#121358] border border-[#2F578A] px-2.5 py-1.5 rounded-xl shadow-lg text-[10px] font-bold text-center z-10 whitespace-nowrap animate-fade-in">
-                      <div className="text-white">{data.count} tarjeta(s)</div>
-                      <div className="text-slate-400 text-[8px] mt-0.5">{data.dateStr}</div>
+                    <div 
+                      className="absolute bottom-full mb-2 border px-2.5 py-1.5 rounded-xl shadow-lg text-[10px] font-bold text-center z-10 whitespace-nowrap animate-fade-in"
+                      style={{
+                        backgroundColor: 'var(--color-card)',
+                        borderColor: 'var(--color-secondary)',
+                        color: 'var(--color-text)'
+                      }}
+                    >
+                      <div>{data.count} tarjeta(s)</div>
+                      <div 
+                        className="text-[8px] mt-0.5"
+                        style={{ color: 'var(--color-text)', opacity: 0.6 }}
+                      >
+                        {data.dateStr}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -188,7 +271,11 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
           {/* Bar Chart Labels */}
           <div className="flex justify-between gap-3 px-4 pt-2">
             {barData.map((data, index) => (
-              <span key={index} className="flex-1 text-center text-xs font-bold text-slate-300 uppercase">
+              <span 
+                key={index} 
+                className="flex-1 text-center text-xs font-bold uppercase"
+                style={{ color: 'var(--color-text)', opacity: 0.8 }}
+              >
                 {data.label}
               </span>
             ))}
@@ -196,24 +283,45 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
         </div>
 
         {/* Section B: Donut Chart - Performance and Effectiveness */}
-        <div className="bg-[#232F72] rounded-3xl border border-[#2F578A] p-6 shadow-xl flex flex-col justify-between min-h-[350px]">
+        <div 
+          className="rounded-3xl border p-6 shadow-xl flex flex-col justify-between min-h-[350px] transition-all hover:border-[var(--color-accent)] duration-300"
+          style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-secondary)' }}
+        >
           <div>
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <Sparkles size={18} className="text-[#AEE2FF]" />
+            <h3 
+              className="text-lg font-bold mb-1 flex items-center gap-2"
+              style={{ color: 'var(--color-text)' }}
+            >
+              <Sparkles size={18} style={{ color: 'var(--color-accent)' }} />
               <span>Rendimiento y Efectividad</span>
             </h3>
-            <p className="text-xs text-slate-355">
+            <p 
+              className="text-xs"
+              style={{ color: 'var(--color-text)', opacity: 0.7 }}
+            >
               Proporción de respuestas correctas vs fallidas.
             </p>
           </div>
 
           {totalReviews === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-[#2F578A]/40 flex items-center justify-center text-slate-400 mb-4 animate-pulse">
+              <div 
+                className="w-16 h-16 rounded-2xl border flex items-center justify-center mb-4 animate-pulse"
+                style={{ 
+                  backgroundColor: 'color-mix(in srgb, var(--color-text) 5%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--color-secondary) 40%, transparent)',
+                  color: 'var(--color-text)'
+                }}
+              >
                 <AlertCircle size={28} />
               </div>
-              <p className="text-sm font-semibold text-slate-300">Sin datos de estudio disponibles</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-[250px]">
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                Sin datos de estudio disponibles
+              </p>
+              <p 
+                className="text-xs mt-1 max-w-[250px]"
+                style={{ color: 'var(--color-text)', opacity: 0.6 }}
+              >
                 Comienza a estudiar tus mazos para generar estadísticas de rendimiento.
               </p>
             </div>
@@ -222,21 +330,23 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
               {/* SVG Circular Donut Chart */}
               <div className="relative w-36 h-36">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                  {/* Background track (Failure / Coral color) */}
+                  {/* Background track (Failure / Secondary color with opacity) */}
                   <circle
                     cx="60"
                     cy="60"
                     r={radius}
-                    className="stroke-[#EF4444]"
+                    style={{ stroke: 'var(--color-secondary)' }}
+                    strokeOpacity={0.25}
                     strokeWidth="10"
                     fill="transparent"
                   />
-                  {/* Foreground indicator (Success / Celeste color) */}
+                  {/* Foreground indicator (Success / Accent color) */}
                   <circle
                     cx="60"
                     cy="60"
                     r={radius}
-                    className="stroke-[#AEE2FF] transition-all duration-1000 ease-out"
+                    style={{ stroke: 'var(--color-accent)' }}
+                    className="transition-all duration-1000 ease-out"
                     strokeWidth="10.5"
                     fill="transparent"
                     strokeDasharray={circ}
@@ -246,10 +356,16 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
                 </svg>
                 {/* Center text inside the ring */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-extrabold text-[#F0F1FF] tracking-tight">
+                  <span 
+                    className="text-3xl font-extrabold tracking-tight"
+                    style={{ color: 'var(--color-text)' }}
+                  >
                     {effectiveness}%
                   </span>
-                  <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider mt-0.5">
+                  <span 
+                    className="text-[9px] font-bold uppercase tracking-wider mt-0.5"
+                    style={{ color: 'var(--color-text)', opacity: 0.7 }}
+                  >
                     Aciertos
                   </span>
                 </div>
@@ -258,21 +374,55 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
               {/* Statistics Legend */}
               <div className="flex flex-col gap-3 justify-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded bg-[#AEE2FF]" />
+                  <div 
+                    className="w-4 h-4 rounded" 
+                    style={{ backgroundColor: 'var(--color-accent)' }}
+                  />
                   <div>
-                    <span className="text-xs text-slate-300 block font-semibold">Correctos (Bien + Fácil)</span>
-                    <span className="text-sm font-extrabold text-[#AEE2FF]">{correctReviews} repasos</span>
+                    <span 
+                      className="text-xs block font-semibold"
+                      style={{ color: 'var(--color-text)', opacity: 0.8 }}
+                    >
+                      Correctos (Bien + Fácil)
+                    </span>
+                    <span 
+                      className="text-sm font-extrabold"
+                      style={{ color: 'var(--color-accent)' }}
+                    >
+                      {correctReviews} repasos
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded bg-[#EF4444]" />
+                  <div 
+                    className="w-4 h-4 rounded" 
+                    style={{ backgroundColor: 'var(--color-secondary)', opacity: 0.6 }}
+                  />
                   <div>
-                    <span className="text-xs text-slate-300 block font-semibold">Fallos (Otra vez)</span>
-                    <span className="text-sm font-extrabold text-[#EF4444]">{wrongReviews} repasos</span>
+                    <span 
+                      className="text-xs block font-semibold"
+                      style={{ color: 'var(--color-text)', opacity: 0.8 }}
+                    >
+                      Fallos (Otra vez)
+                    </span>
+                    <span 
+                      className="text-sm font-extrabold"
+                      style={{ color: 'var(--color-secondary)' }}
+                    >
+                      {wrongReviews} repasos
+                    </span>
                   </div>
                 </div>
-                <div className="border-t border-[#2F578A]/40 pt-2 mt-1">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Repasos Totales: {totalReviews}</span>
+                <div 
+                  className="border-t pt-2 mt-1"
+                  style={{ borderColor: 'color-mix(in srgb, var(--color-secondary) 40%, transparent)' }}
+                >
+                  <span 
+                    className="text-[10px] font-bold uppercase"
+                    style={{ color: 'var(--color-text)', opacity: 0.6 }}
+                  >
+                    Repasos Totales: {totalReviews}
+                  </span>
                 </div>
               </div>
             </div>
@@ -281,10 +431,19 @@ export default function StatsScreen({ decks, reviewHistory, onBack }) {
       </div>
 
       {/* Helpful Tip */}
-      <div className="bg-[#232F72]/50 rounded-2xl border border-[#2F578A]/50 p-4 flex items-start gap-3">
-        <CheckCircle2 className="text-[#AEE2FF] shrink-0 mt-0.5" size={16} />
-        <p className="text-xs text-slate-300 leading-relaxed">
-          <strong>Tip de Retención:</strong> Mantener una efectividad de aciertos superior al 80-90% indica que tu intervalo de repaso es el correcto. Si baja del 80%, considera presionar "Otra vez" más seguido para reajustar la facilidad del algoritmo SuperMemo-2.
+      <div 
+        className="rounded-2xl border p-4 flex items-start gap-3"
+        style={{ 
+          backgroundColor: 'color-mix(in srgb, var(--color-card) 50%, transparent)', 
+          borderColor: 'color-mix(in srgb, var(--color-secondary) 50%, transparent)' 
+        }}
+      >
+        <CheckCircle2 style={{ color: 'var(--color-accent)' }} className="shrink-0 mt-0.5" size={16} />
+        <p 
+          className="text-xs leading-relaxed"
+          style={{ color: 'var(--color-text)', opacity: 0.9 }}
+        >
+          <strong style={{ color: 'var(--color-accent)' }}>Tip de Retención:</strong> Mantener una efectividad de aciertos superior al 80-90% indica que tu intervalo de repaso es el correcto. Si baja del 80%, considera presionar "Otra vez" más seguido para reajustar la facilidad del algoritmo SuperMemo-2.
         </p>
       </div>
 
