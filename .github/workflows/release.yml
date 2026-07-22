@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  releases: write
 
 jobs:
   release:
@@ -45,5 +46,6 @@ jobs:
       - name: Compile and Release Electron App
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder ${{ matrix.builder-args }} --publish always
