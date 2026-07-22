@@ -8,6 +8,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import StatsScreen from './screens/StatsScreen';
 import CSVImporter from './components/CSVImporter';
 import { Sparkles } from 'lucide-react';
+import logoIcon from './assets/logo-icon.png';
 
 export default function App() {
   const {
@@ -42,16 +43,16 @@ export default function App() {
     setIsCSVImporterOpen(true);
   };
 
-  // Pantalla de carga estética
+  // Pantalla de carga estética con logo oficial
   if (loading) {
     return (
       <div className="h-screen w-screen bg-light-bg dark:bg-dark-bg flex flex-col items-center justify-center gap-4 transition-all duration-300 ease-in-out">
-        <div className="w-16 h-16 bg-light-card dark:bg-dark-card rounded-3xl border border-frida-primary/30 dark:border-dark-muted flex items-center justify-center text-frida-primary shadow-sm relative transition-all duration-300 ease-in-out">
-          <Sparkles size={28} className="animate-pulse text-frida-primary" />
+        <div className="w-20 h-20 p-2.5 bg-light-card/90 dark:bg-dark-card/90 rounded-3xl border border-frida-primary/30 dark:border-dark-muted flex items-center justify-center shadow-lg relative transition-all duration-300 ease-in-out animate-bounce">
+          <img src={logoIcon} alt="Frida Doodle Logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-base font-bold text-light-text dark:text-dark-text">Frida</span>
-          <span className="text-xs font-medium text-warmgray-450 dark:text-warmgray-400">Preparando tus mazos...</span>
+          <span className="text-lg font-black uppercase tracking-tight text-light-text dark:text-dark-text">Frida</span>
+          <span className="text-xs font-semibold text-warmgray-450 dark:text-warmgray-400">Preparando tus mazos...</span>
         </div>
       </div>
     );
