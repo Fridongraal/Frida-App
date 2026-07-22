@@ -6,8 +6,6 @@ on:
       - "v*"
   workflow_dispatch:
 
-  releases: write
-
 jobs:
   release:
     name: Build and Release (${{ matrix.os }})
