@@ -1,6 +1,7 @@
 import React from 'react';
 import { Flame, TrendingUp, Settings, Upload, FolderPlus } from 'lucide-react';
 import logoIcon from '../assets/logo-icon.png';
+import logoText from '../assets/logo-text.png';
 
 export default function Navbar({
   displayStreak,
@@ -13,25 +14,22 @@ export default function Navbar({
     <header className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
       {/* BRAND LOGO CONTAINER */}
       <div className="flex items-center gap-3 group cursor-pointer">
-        <div className="relative flex items-center justify-center p-2 rounded-2xl bg-light-card/80 dark:bg-dark-card/80 border border-frida-primary/20 dark:border-dark-muted shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:rotate-2">
+        {/* Isotipo (Perrito) */}
+        <div className="relative flex items-center justify-center p-2 rounded-2xl bg-light-card/80 dark:bg-dark-card/80 border border-frida-primary/20 dark:border-dark-muted shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:rotate-2 shrink-0">
           <img
             src={logoIcon}
-            alt="Frida Logo"
-            className="h-9 w-9 object-contain drop-shadow-sm transition-transform duration-200"
+            alt="Frida Isotipo"
+            className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm transition-transform duration-200"
           />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-light-text dark:text-dark-text tracking-tight uppercase">
-              Frida
-            </h1>
-            <span className="text-[10px] font-extrabold bg-frida-secondary/30 dark:bg-frida-primary/25 text-frida-primary dark:text-frida-secondary px-2.5 py-0.5 rounded-full border border-frida-primary/20">
-              Doodle App
-            </span>
-          </div>
-          <p className="text-xs text-warmgray-455 dark:text-warmgray-400 font-medium">
-            Repetición espaciada inteligente
-          </p>
+
+        {/* Tipografía Logo (Texto "FRIDA") */}
+        <div className="flex items-center shrink-0">
+          <img
+            src={logoText}
+            alt="FRIDA"
+            className="h-8 sm:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+          />
         </div>
       </div>
 
