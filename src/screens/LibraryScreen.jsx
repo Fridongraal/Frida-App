@@ -162,7 +162,7 @@ export default function LibraryScreen({
             )}
 
             {/* LISTA DE MATERIAS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               {subjects.map((subject) => {
                 const summary = getSubjectSummary(subject, new Date());
                 const subjectDecks = decks.filter((deck) => deck.subjectId === subject.id);
@@ -170,9 +170,9 @@ export default function LibraryScreen({
                 return (
                   <div
                     key={subject.id}
-                    className="bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-dark-muted rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
+                    className="bg-light-card dark:bg-dark-card border border-frida-primary/15 dark:border-dark-muted rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between w-full h-full group gap-4"
                   >
-                    <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
                         <button
                           onClick={() => onOpenSubject(subject.id)}
@@ -205,20 +205,22 @@ export default function LibraryScreen({
                     </div>
 
                     {/* VISTA DE MAZOS DE LA MATERIA */}
-                    {subjectDecks.length > 0 ? (
-                      <DeckList
-                        decks={subjectDecks}
-                        onStudy={onStudy}
-                        onAddCard={onAddCard}
-                        onDeleteDeck={onDeleteDeck}
-                      />
-                    ) : (
-                      <div className="p-4 bg-light-bg dark:bg-dark-bg/40 rounded-2xl border border-frida-primary/10 dark:border-dark-muted/30 text-center">
-                        <span className="text-xs text-warmgray-450 dark:text-warmgray-400 font-medium">
-                          Esta materia no tiene mazos aún.
-                        </span>
-                      </div>
-                    )}
+                    <div className="w-full flex-1 flex flex-col justify-center">
+                      {subjectDecks.length > 0 ? (
+                        <DeckList
+                          decks={subjectDecks}
+                          onStudy={onStudy}
+                          onAddCard={onAddCard}
+                          onDeleteDeck={onDeleteDeck}
+                        />
+                      ) : (
+                        <div className="p-6 bg-light-bg dark:bg-dark-bg/40 rounded-2xl border border-frida-primary/10 dark:border-dark-muted/30 text-center w-full py-6">
+                          <span className="text-xs text-warmgray-450 dark:text-warmgray-400 font-semibold">
+                            Esta materia no tiene mazos aún.
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
