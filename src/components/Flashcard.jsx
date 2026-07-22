@@ -48,7 +48,7 @@ export default function Flashcard({ card, isFlipped, onFlip, onEdit }) {
 
         {/* CARA POSTERIOR (Respuesta) */}
         <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-light-card dark:bg-dark-card rounded-3xl p-8 border border-frida-primary/20 dark:border-dark-muted shadow-sm flex flex-col justify-between items-center text-center transition-all duration-300 ease-in-out">
-          <div className="w-full flex items-center justify-between rotate-y-180">
+          <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-bold text-frida-primary tracking-wider uppercase">
               <CheckCircle size={14} />
               <span>Respuesta</span>
@@ -68,13 +68,13 @@ export default function Flashcard({ card, isFlipped, onFlip, onEdit }) {
             )}
           </div>
           
-          <div className="flex-1 flex items-center justify-center px-4 overflow-y-auto py-2 rotate-y-180">
+          <div className="flex-1 flex items-center justify-center px-4 overflow-y-auto py-2">
             <p className="text-xl font-medium text-light-text dark:text-dark-text leading-relaxed whitespace-pre-wrap">
               {card.back}
             </p>
           </div>
           
-          <div className="text-xs text-frida-primary/80 dark:text-frida-primary/60 font-medium rotate-y-180">
+          <div className="text-xs text-frida-primary/80 dark:text-frida-primary/60 font-medium">
             <span>Califica tu recuerdo abajo para continuar</span>
           </div>
         </div>
