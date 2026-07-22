@@ -31,6 +31,11 @@ export default function Navbar({
             className="h-10 sm:h-12 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
         </div>
+
+        {/* Subtítulo Discreto / Tag Visual */}
+        <span className="text-sm font-semibold text-warmgray-455 dark:text-warmgray-400 opacity-60 ml-1.5 select-none hidden sm:inline-block tracking-tight shrink-0">
+          — Repetición Espaciada
+        </span>
       </div>
 
       {/* HEADER ACTIONS */}
