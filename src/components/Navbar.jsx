@@ -11,15 +11,15 @@ export default function Navbar({
   onCreateSubject,
 }) {
   return (
-    <header className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+    <header className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-4 sm:py-5 mb-8">
       {/* BRAND LOGO CONTAINER */}
-      <div className="flex items-center gap-3 group cursor-pointer">
+      <div className="flex items-center gap-3.5 group cursor-pointer">
         {/* Isotipo (Perrito) */}
-        <div className="relative flex items-center justify-center p-2 rounded-2xl bg-light-card/80 dark:bg-dark-card/80 border border-frida-primary/20 dark:border-dark-muted shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:rotate-2 shrink-0">
+        <div className="relative flex items-center justify-center p-2.5 rounded-3xl bg-light-card/80 dark:bg-dark-card/80 border border-frida-primary/20 dark:border-dark-muted shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:rotate-2 shrink-0">
           <img
             src={logoIcon}
             alt="Frida Isotipo"
-            className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm transition-transform duration-200"
+            className="h-14 sm:h-16 w-auto object-contain drop-shadow-sm transition-transform duration-200"
           />
         </div>
 
@@ -28,7 +28,7 @@ export default function Navbar({
           <img
             src={logoText}
             alt="FRIDA"
-            className="h-8 sm:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
         </div>
       </div>
