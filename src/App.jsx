@@ -108,6 +108,7 @@ export default function App() {
           <HomeScreen
             subjects={subjects}
             decks={decks}
+            reviewHistory={reviewHistory}
             onCreateSubject={addSubject}
             onOpenSubject={navigateToSubject}
             onOpenSettings={() => setCurrentScreen('settings')}
